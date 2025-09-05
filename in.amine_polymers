@@ -1,0 +1,35 @@
+print "Starting in.amine_polymers"
+
+# simulation parameters
+units lj    #  Lennard-Jones units, essentially unitless
+dimension 3
+boundary p p p
+atom_style molecular 
+
+# initial configuration
+read_data data.particles
+
+# interatomic potential (WCA)
+pair_style lj/cut 1.122462 # WCA potential cutoff at 2^(1/6) * sigma
+pair_modify shift yes # shift potential to zero at cutoff
+pair_coeff * * 1.0 1.0 # epsilon, sigma
+
+# bond potential (harmonic)
+bond_style harmonic
+bond_coeff * 100.0 1.0 # k, r0
+
+# neighbor list
+neighbor 0.3 bin
+neigh_modify every 1 delay 0 check yes
+
+# initial velocities
+# velocity all create 1.0 1
+fix 1 all nve # integrate with NVE ensemble
+
+dump 1 all atom 100 dump.polymer.lammpstrj
+timestep 0.005
+thermo 100
+run 10000
+
+
+print "Ending in.amine_polymers"
