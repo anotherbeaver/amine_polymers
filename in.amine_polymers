@@ -5,30 +5,53 @@ units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
 boundary p p p
 atom_style molecular 
+log log.amine_polymers 
 
 # initial configuration
-read_data data.particles
+read_data data/data.particles
 
-# interatomic potential (WCA)
+# group definitions
+group monomer type 1
+group amine type 2
+
+# # interatomic potential (WCA)
 pair_style lj/cut 1.122462 # WCA potential cutoff at 2^(1/6) * sigma
 pair_modify shift yes # shift potential to zero at cutoff
 pair_coeff * * 1.0 1.0 # epsilon, sigma
 
+# # interatomic potential (for type 2 amines, table)
+# pair_style table linear 1000
+# pair_coeff 2 2 table table.amine 1 1
+# pair_coeff 1 2 table table.amine 0 0
+# pair_coeff 1 1 table table.amine 0 0
+
+pair_style hybrid/overlay lj/cut 1.12246 table linear 500
+pair_coeff 1 1 lj/cut 1.0 1.0 1.12246
+pair_coeff 1 2 lj/cut 1.0 1.0 1.12246
+pair_coeff 2 2 lj/cut 1.0 1.0 1.12246
+pair_coeff 2 2 table potential/exp.table EXP
+
 # bond potential (harmonic)
 bond_style harmonic
-bond_coeff * 100.0 1.0 # k, r0
+bond_coeff * 50.0 1.0 # k, r0
+# k is derived from Raffaeilli and Ellenbroek, Soft Matter 2021
+# "...polymer backbones have a stiffness of 50e/b^2..."
 
-# neighbor list
+# neighbor list (not too sure why we need this)
 neighbor 0.3 bin
 neigh_modify every 1 delay 0 check yes
 
-# initial velocities
-# velocity all create 1.0 1
-fix 1 all nve # integrate with NVE ensemble
+# track transient bonds
+compute 1 amine pair/local dist 
+dump 1 amine local 10 data/amine_bonds.dat c_1
 
-dump 1 all atom 100 dump.polymer.lammpstrj
+# initial velocities
+velocity all create 1.0 1
+fix 1 all nve # integrate with NVE ensemble (maybe changed to nvt later)
+
+dump 2 all atom 10 data/dump.polymer.lammpstrj
 timestep 0.005
-thermo 100
+thermo 10
 run 10000
 
 
