@@ -5,7 +5,7 @@ units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
 boundary p p p
 atom_style molecular 
-log log.amine_polymers 
+log logs/log.amine_polymers 
 
 # initial configuration
 read_data data/data.particles
