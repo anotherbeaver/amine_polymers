@@ -13,16 +13,16 @@ Based on Rafaelli and Ellenbroek, Soft Matter, 2021 10.1039/d1sm00091h
 import numpy as np
 
 # Parameters for the exponential potential
-A = 50.0 # Tune this parameter by replicating the Arrhenius equation (see paper)
-sigma_G = 0.19
+A = 50 # Tune this parameter by replicating the Arrhenius equation (see paper)
+sigma_G = 0.19 # from paper
 
 def exponential_potential(r):
-    return - A * np.exp(-r / (2 * sigma_G**2))
+    return - A * np.exp(-r**2 / (2 * sigma_G**2))
 
 def exponential_force(r):
-    return - (A / (2 * sigma_G**2)) * np.exp(-r / (2 * sigma_G**2))
+    return - (A * r / (sigma_G**2)) * np.exp(-r**2 / (2 * sigma_G**2))
 
-def generate_exponential_file(filename='potential/exp.table', r_min=1, r_max=2.0, num_points=500):
+def generate_exponential_file(filename='potential/exp.table', r_min=0.00001, r_max=2.0, num_points=500):
     r_values = np.linspace(r_min, r_max, num_points)
     V_values = exponential_potential(r_values)
     F_values = exponential_force(r_values)
