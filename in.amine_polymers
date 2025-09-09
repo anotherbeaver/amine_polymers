@@ -28,9 +28,14 @@ bond_coeff 2 100 0.45 # stiff spring on patches
 # interatomic potentials (non-bonded)
 pair_style hybrid/overlay lj/cut 1.12246 gauss 2.0
 pair_coeff 1 1 lj/cut 1.0 1.0 1.12246 # WCA between backbone beads
-pair_coeff 1 2 lj/cut 0.0 1.0 1.12246 # no WCA between backbone and amine patches
+pair_coeff 1 2 lj/cut 1.0 1.0 1.12246 # WCA between backbone and amine patches
 pair_coeff 2 2 lj/cut 0.0 1.0 1.12246 # no WCA between amine patches
+pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss 50.0 13.8504155125 2.0 # Gaussian attraction between amine patches
+
+# save potential as a file
+pair_write 1 2 1000 r 1.25 2.45 data/pair_coeff_1_2.txt BACKBONE_PATCH
+pair_write 2 2 1000 r 0.8 2.0 data/pair_coeff_2_2.txt PATCH_PATCH
 
 
 # neighbor list (not too sure why we need this)
@@ -38,8 +43,8 @@ neighbor 0.3 bin
 neigh_modify every 1 delay 0 check yes
 
 # Energy minimization to relax overlaps (is this necessary?)
-min_style cg             # conjugate gradient (good default)
-minimize 1.0e-6 1.0e-8 10000 100000
+# min_style cg             # conjugate gradient (good default)
+# minimize 1.0e-6 1.0e-8 10000 100000
 
 # track transient bonds
 compute 1 amine pair/local dist 

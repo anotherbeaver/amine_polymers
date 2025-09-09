@@ -1,35 +1,47 @@
 import matplotlib.pyplot as plt
 
-def plot_exp(filename):
-    r = []
-    V = []
-    F = []
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        for line in lines[5:]:  # Skip header lines
-            parts = line.split()
-            r.append(float(parts[1]))
-            V.append(float(parts[2]))
-            F.append(float(parts[3]))
+def plot_summed_potentials():
+    pot_1 = "data/pair_coeff_1_2.txt"
+    pot_2 = "data/pair_coeff_2_2.txt"
 
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(r, V, label='V(r)')
+    r1, e1 = [], []
+    r2, e2 = [], []
+
+    def read_pot(filename):
+        r_vals, e_vals = [], []
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line.strip() == "" or line.startswith("#") or line[0].isalpha():
+                    continue  # skip comments, headers
+                try:
+                    idx, r, e, fr = map(float, line.split())
+                except ValueError:
+                    continue  # skip bad lines
+                r_vals.append(r)
+                e_vals.append(e)
+        return r_vals, e_vals
+
+    r1, e1 = read_pot(pot_1)
+    r2, e2 = read_pot(pot_2)
+
+    if len(r1) != len(r2):
+        raise ValueError("Potential tables have different r-grid lengths!")
+
+    e_total = [e1[i] + e2[i] for i in range(len(r1))]
+
+    # plt.plot(r2, e1, label='Backbone-Patch')
+    plt.plot(r2, e2, label='Patch-Patch')
+    # plt.plot(r2, e_total, label='Sum', linestyle='--')
     plt.xlabel('r')
-    plt.ylabel('Potential Energy V(r)')
-    plt.title('Exponential Potential V(r)')
-    plt.grid()
+    plt.ylabel('U(r)')
+    # plt.ylim(-5, 5)
     plt.legend()
-    plt.subplot(1, 2, 2)
-    plt.plot(r, F, label='F(r)', color='orange')
-    plt.xlabel('r')
-    plt.ylabel('Force F(r)')
-    plt.title('Force F(r)')
-    plt.grid()
-    plt.legend()
-    plt.tight_layout()
+    plt.title('Summed Interaction Potentials')
+    # plt.savefig('data/summed_potentials.png', dpi=300)
     plt.show()
-
+    # plt.close()
 
 if __name__ == "__main__":
-    plot_exp('potential/exp.table')    
+    plot_summed_potentials()
+

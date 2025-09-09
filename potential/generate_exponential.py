@@ -8,6 +8,9 @@ Form of the potential:
     V(r) = A * exp(-r/(2 * sigma_G^2))
 
 Based on Rafaelli and Ellenbroek, Soft Matter, 2021 10.1039/d1sm00091h
+
+NOTE: THIS IS NOT USED IN THE FINAL SIMULATIONS. INSTEAD, A GAUSSIAN POTENTIAL IS USED.
+There was an error in the paper, it should be a Gaussian potential, not an exponential.
 """
 
 import numpy as np
