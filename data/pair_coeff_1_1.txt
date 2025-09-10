@@ -1,7 +1,7 @@
 # DATE: 2025-09-10 UNITS: lj Created by pair_write
-# Pair potential hybrid/overlay for atom types 1 2: i,r,energy,force
+# Pair potential hybrid/overlay for atom types 1 1: i,r,energy,force
 
-BACKBONE_PATCH
+BACKBONE_BACKBONE
 N 1000 R 0.01 2
 
        1  0.01                   9.31923404899047e+25   1.11830808587897e+29 
@@ -1004,9 +1004,9 @@ N 1000 R 0.01 2
      998  1.99601601601602       0                      0                    
      999  1.99800800800801       0                      0                    
     1000  2                      0                      0                    
-# Pair potential hybrid/overlay for atom types 1 2: i,r,energy,force
+# Pair potential hybrid/overlay for atom types 1 1: i,r,energy,force
 
-BACKBONE_PATCH
+BACKBONE_BACKBONE
 N 1000 R 0.01 2
 
        1  0.01                   9.31923404899047e+25   1.11830808587897e+29 
@@ -2009,9 +2009,9 @@ N 1000 R 0.01 2
      998  1.99601601601602       0                      0                    
      999  1.99800800800801       0                      0                    
     1000  2                      0                      0                    
-# Pair potential hybrid/overlay for atom types 1 2: i,r,energy,force
+# Pair potential hybrid/overlay for atom types 1 1: i,r,energy,force
 
-BACKBONE_PATCH
+BACKBONE_BACKBONE
 N 1000 R 0.01 2
 
        1  0.01                   9.31923404899047e+25   1.11830808587897e+29 
@@ -3014,9 +3014,9 @@ N 1000 R 0.01 2
      998  1.99601601601602       0                      0                    
      999  1.99800800800801       0                      0                    
     1000  2                      0                      0                    
-# Pair potential hybrid/overlay for atom types 1 2: i,r,energy,force
+# Pair potential hybrid/overlay for atom types 1 1: i,r,energy,force
 
-BACKBONE_PATCH
+BACKBONE_BACKBONE
 N 1000 R 0.01 2
 
        1  0.01                   9.31923404899047e+25   1.11830808587897e+29 
@@ -4019,9 +4019,9 @@ N 1000 R 0.01 2
      998  1.99601601601602       0                      0                    
      999  1.99800800800801       0                      0                    
     1000  2                      0                      0                    
-# Pair potential hybrid/overlay for atom types 1 2: i,r,energy,force
+# Pair potential hybrid/overlay for atom types 1 1: i,r,energy,force
 
-BACKBONE_PATCH
+BACKBONE_BACKBONE
 N 1000 R 0.01 2
 
        1  0.01                   9.31923404899047e+25   1.11830808587897e+29 

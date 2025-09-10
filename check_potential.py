@@ -17,9 +17,11 @@ def shift_and_sum(r1, e1, r2, e2, x0):
 def plot_summed_potentials():
     pot_1 = "data/pair_coeff_1_2.txt"
     pot_2 = "data/pair_coeff_2_2.txt"
+    pot_3 = "data/pair_coeff_1_1.txt"
 
     r1, e1 = [], []
     r2, e2 = [], []
+    r3, e3 = [], []
 
     def read_pot(filename):
         r_vals, e_vals = [], []
@@ -38,9 +40,11 @@ def plot_summed_potentials():
 
     r1, e1 = read_pot(pot_1)
     r2, e2 = read_pot(pot_2)
+    r3, e3 = read_pot(pot_3)
 
     r1, e1 = np.array(r1), np.array(e1)
     r2, e2 = np.array(r2), np.array(e2)
+    r3, e3 = np.array(r3), np.array(e3)
 
     if len(r1) != len(r2):
         raise ValueError("Potential tables have different r-grid lengths!")
@@ -50,11 +54,13 @@ def plot_summed_potentials():
     # e_total = e1 + e2
 
     plt.plot(r1, e1, label='Backbone-Patch (WCA)')
-    plt.plot(r1, e2, label='Patch-Patch (Gaussian)')
-    plt.plot(r1, e_total, label='Sum', linestyle='--')
+    plt.plot(r2, e2, label='Patch-Patch (Gaussian)')
+    plt.plot(r3, e3, label='Backbone-Backbone (WCA)')
+    # plt.plot(r1, e_total, label='Sum', linestyle='--')
     plt.xlabel('r')
     plt.ylabel('U(r)')
-    plt.ylim(-40, 40)
+    plt.ylim(-20, 20)
+    plt.xlim(0, 1.5)
     plt.legend()
     plt.title('Summed Interaction Potentials')
     # plt.savefig('data/summed_potentials.png', dpi=300)
