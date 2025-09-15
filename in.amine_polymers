@@ -1,3 +1,5 @@
+# mpirun -np 6 ../lammps/build/lmp -in in.amine_polymers
+
 print "Starting in.amine_polymers"
 
 # simulation parameters
@@ -8,7 +10,9 @@ atom_style bond
 log logs/log.amine_polymers 
 
 variable N equal 1000
-variable BOX_SIZE equal 40
+# variable BOX_SIZE equal 40
+variable BOX_SIZE equal 40  
+
 
 # initial configuration
 # read_data data/data.particles
@@ -36,7 +40,7 @@ pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
 pair_coeff 1 2 lj/cut 1.0 1.3  # WCA between backbone and amine patches
 pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
 pair_modify shift yes # shift to zero at cutoff
-pair_coeff 2 2 gauss 50.0 13.8504155125 2.0 # Gaussian attraction between amine patches
+pair_coeff 2 2 gauss 50.0 13.8504255125 2.0 # Gaussian attraction between amine patches
 
 create_atoms 0 random $N 12345 box mol polymer 12345
 
@@ -63,6 +67,8 @@ minimize 1.0e-6 1.0e-8 10000 100000
 # track transient bonds
 # compute amine_pairs amine pair/local id1 id2 dist 
 # dump 1 amine local 10 data/amine_bonds.dat c_amine_pairs[*]
+# group all_atoms type 1 2
+displace_atoms all move 0.0 0.0 0.0 units box
 dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
 
 
@@ -76,7 +82,7 @@ print "damping coefficient is $(200.0*dt)"
 reset_timestep 0
 dump 2 all atom 10 data/dump.equil.lammpstrj
 thermo 100
-run 1000
+run 10000
 
 # # equilibration done, now run NVT ensemble with thermostat
 # unfix 1

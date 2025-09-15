@@ -6,7 +6,7 @@ Note that the formatting of individual atoms has been split across the sections 
 
 
 chain_length = 25  # number of monomers in a chain
-amine_spacing = 10  # spacing between amine groups in a chain
+amine_spacing = 5  # spacing between amine groups in a chain
 backbone_to_dummy = 1.0  # distance from backbone to dummy atom
 dummy_to_patch = 0.4 # distance from dummy atom to patch
 BOX_X = chain_length + 2 # length of monomer-monomer distances with extra padding (1)
