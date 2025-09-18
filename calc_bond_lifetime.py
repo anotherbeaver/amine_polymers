@@ -12,7 +12,7 @@ def compute_bond_lifetimes(data, timestep_size=10):
             ['timestep', 'id1', 'id2', 'x1', 'y1', 'z1', 'x2', 'y2', 'z2', 'distance']
 
     Returns:
-        dict: Keys are (id1, id2) tuples, values are lists of bond lifetimes (in time units)
+        dict: Keys are (id1, id2) tuples, values are lists of bond lifetimes (in timesteps)
         dict: Keys are (id1, id2) tuples, values are lists of lists of timesteps when each bond was active
     """
     bond_lifetimes = {}
@@ -42,7 +42,7 @@ def plot_bond_lifetimes(bond_lifetimes, title='Bond Lifetimes Histogram'):
     all_lifetimes = [lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]
 
     plt.hist(all_lifetimes, bins=100, density=True)
-    plt.xlabel('Bond Lifetime (time units)')
+    plt.xlabel('Bond Lifetime (timesteps)')
     plt.ylabel('Probability Density')
     plt.title(title)
     plt.show()
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     bond_lifetimes, bond_timesteps = compute_bond_lifetimes(data)
 
-    print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} time units")
+    print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} timesteps")
 
     save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes_A.csv')
 
@@ -104,15 +104,11 @@ if __name__ == "__main__":
 
     bond_lifetimes, bond_timesteps = compute_bond_lifetimes(data)
 
-    print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} time units")
+    print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} timesteps")
 
     save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes_C.csv')
 
     # graph histogram of bond lifetimes
     plot_bond_lifetimes(bond_lifetimes, title='Bond Lifetimes Histogram (Type C)')
-
-
-
-
 
 

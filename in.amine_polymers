@@ -9,10 +9,17 @@ boundary p p p
 atom_style bond 
 log logs/log.amine_polymers 
 
-variable N equal 1000
-# variable BOX_SIZE equal 40
-variable BOX_SIZE equal 40  
+variable N equal 800
+# variable N equal 10
+variable BOX_SIZE equal 40
 
+# variable patch_bond_r0 equal 0.9  # A type
+variable patch_bond_r0 equal 0.45  # C type
+
+# variable patch_gauss_B_width equal 13.8504255125 # A type
+variable patch_gauss_B_width equal 2.6315789474 # C type
+
+variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches
 
 # initial configuration
 # read_data data/data.particles
@@ -32,7 +39,8 @@ bond_style harmonic
 bond_coeff 1 50.0 1.0 # k, r0 # backbone stiffness
 # k is derived from Raffaeilli and Ellenbroek, Soft Matter 2021
 # "...polymer backbones have a stiffness of 50e/b^2..."
-bond_coeff 2 100 0.9 # stiff spring on patches
+bond_coeff 2 100 ${patch_bond_r0} # stiff spring on patches
+# NOTE: THIS IS WHERE A/C DIFFERENCE IS (0.9 vs 0.45)
 
 # interatomic potentials (non-bonded)
 pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0 # cutoff for both at 2.0
@@ -40,7 +48,7 @@ pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
 pair_coeff 1 2 lj/cut 1.0 1.3  # WCA between backbone and amine patches
 pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
 pair_modify shift yes # shift to zero at cutoff
-pair_coeff 2 2 gauss 50.0 13.8504255125 2.0 # Gaussian attraction between amine patches
+pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
 create_atoms 0 random $N 12345 box mol polymer 12345
 
@@ -50,10 +58,10 @@ group amine type 2
 
 write_data data/data.replicated_particles # for visualization in OVITO
 
-# save potential as a file
-pair_write 1 1 1000 r 0.01 2.0 data/pair_coeff_1_1.txt BACKBONE_BACKBONE
-pair_write 1 2 1000 r 0.01 2.0 data/pair_coeff_1_2.txt BACKBONE_PATCH
-pair_write 2 2 1000 r 0.01 2.0 data/pair_coeff_2_2.txt PATCH_PATCH
+# save potential as a file (DEBUGGING)
+# pair_write 1 1 1000 r 0.01 2.0 data/pair_coeff_1_1.txt BACKBONE_BACKBONE
+# pair_write 1 2 1000 r 0.01 2.0 data/pair_coeff_1_2.txt BACKBONE_PATCH
+# pair_write 2 2 1000 r 0.01 2.0 data/pair_coeff_2_2.txt PATCH_PATCH
 
 
 # neighbor list (not too sure why we need this)
@@ -63,37 +71,49 @@ neigh_modify every 1 delay 0 check yes
 # Energy minimization to relax overlaps (is this necessary?)
 min_style cg             # conjugate gradient (good default)
 minimize 1.0e-6 1.0e-8 10000 100000
+reset_timestep 0
 
 # track transient bonds
 # compute amine_pairs amine pair/local id1 id2 dist 
 # dump 1 amine local 10 data/amine_bonds.dat c_amine_pairs[*]
 # group all_atoms type 1 2
-displace_atoms all move 0.0 0.0 0.0 units box
-dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+# displace_atoms all move 0.0 0.0 0.0 units box
+# dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+
+# mean squared displacement for diffusion calculations
+compute MSD all msd
+fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_equil.dat mode scalar
 
 
 # initial velocities for equilibration
 timestep 0.005 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
-velocity all create 0.6 1 # initial temperature 0.6, random seed 1
-fix 1 all nvt temp 0.6 0.6 $(200.0*dt) # NVT ensemble, temp 0.6, damping parameter 1.0
-print "damping coefficient is $(200.0*dt)"
+velocity all create 1.0 1 # initial temperature 1.0, random seed 1
+fix 1 all nvt temp 1.0 1.0 $(100.0*dt) # NVT ensemble, temp 1.0, damping parameter $(100.0*dt)
+print "damping coefficient is $(100.0*dt)"
 # fix 1 all nve # integrate with NVE ensemble
 
-reset_timestep 0
 dump 2 all atom 10 data/dump.equil.lammpstrj
 thermo 100
 run 10000
 
-# # equilibration done, now run NVT ensemble with thermostat
+# equilibration done, now run NVT ensemble with thermostat
 # unfix 1
+# unfix msd_avg
 # undump 2
-# undump 1
+# uncompute MSD
+# undump aminepos
 # reset_timestep 0
-# fix 2 all nvt temp 0.6 0.6 1.0 # NVT ensemble, temp 20, damping parameter 1.0
+
+# compute MSD all msd
+# fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_nvt.dat mode scalar
+
+# displace_atoms all move 0.0 0.0 0.0 units box
+dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+# fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
 # dump 3 all atom 10 data/dump.nvt.lammpstrj
-# timestep 0.001
-# thermo 100
-# run 20000
+timestep 0.005
+thermo 100
+run 40000
 
 
 
