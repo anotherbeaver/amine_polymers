@@ -7,10 +7,10 @@ units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
 boundary p p p
 atom_style bond 
-log logs/log.amine_polymers 
+# log logs/log.amine_polymers # TODO: change this back
 
-# variable N equal 600
-variable N equal 2
+variable N equal 500
+# variable N equal 20
 variable BOX_SIZE equal 40
 
 # variable patch_bond_r0 equal 0.9  # A type
@@ -21,85 +21,79 @@ variable patch_gauss_B_width equal 2.6315789474 # C type
 
 variable patch_gauss_A_strength equal 0 # strength of Gaussian attraction between amine patches
 
+# variable hbond_energy_scale equal 100.0 # strength of hydrogen bond interaction between amine patches
+# TODO: currently this is being set by run.sh, turn it back when done testing
+
 # initial configuration
 # read_data data/data.particles
 # replicate 5 10 10
 
 # trying with molecule file instead
 region box block 0 ${BOX_SIZE} 0 ${BOX_SIZE} 0 ${BOX_SIZE}
-create_box 3 box bond/types 2 extra/bond/per/atom 4 extra/special/per/atom 20
+create_box 4 box bond/types 4 extra/bond/per/atom 5 extra/special/per/atom 20
 
 molecule polymer data/polymer.molecule
 
 
 create_atoms 0 random $N 12345 box mol polymer 12345
 
+
 # group definitions
 group monomer type 1
-group dummy type 2
-group patch type 3
+group donor type 2
+group h_dummy type 3
+group acceptor type 4
 
 mass 1 1.0 # backbone mass
-mass 2 1.0 # dummy mass
-mass 3 1.0 # patch mass
+mass 2 1.0 # donor mass
+mass 3 1.0 # h_dummy mass
+mass 4 1.0 # acceptor mass
+
+# write_data data/data.replicated_particles # for visualization in OVITO 
+# TODO: change this back
+
 
 
 # bond potentials (harmonic)
 bond_style harmonic
 bond_coeff 1 50.0 1.0 # k, r0 # backbone stiffness
 bond_coeff 2 50.0 1.0 # k, r0 # backbone stiffness
+bond_coeff 3 50.0 0.45 # k, r0 # donor–h_dummy bond
+bond_coeff 4 50.0 0.45 # k, r0 # backbone
 # k is derived from Raffaeilli and Ellenbroek, Soft Matter 2021
 # "...polymer backbones have a stiffness of 50e/b^2..."
 # bond_coeff 2 100 ${patch_bond_r0} # stiff spring on patches
 # NOTE: THIS IS WHERE A/C DIFFERENCE IS (0.9 vs 0.45)
 
-# interatomic potentials (non-bonded)
-# pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0 # cutoff for both at 2.0
-# pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
-# pair_coeff 1 2 lj/cut 1.0 1.3  # WCA between backbone and dummy beads
-# pair_coeff 2 2 lj/cut 1.0 1.3  # WCA between dummy and dummy
-# pair_coeff 2 3 lj/cut 0.0 1.3 # no WCA between amine patches
-# pair_coeff 1 3 lj/cut 0.0 1.3 # no WCA between backbone and amine patches
-# pair_coeff 3 3 lj/cut 0.0 1.3 # no WCA between amine patches
-# pair_modify shift yes # shift to zero at cutoff
-# pair_coeff 3 3 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
-
 # nonbonded potentials
-pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0
+pair_style hybrid/overlay lj/cut 1.4592006628 hbond/dreiding/lj 4 0.8 2.0 180.0
 
 # WCA repulsions
 pair_coeff 1 1 lj/cut 1.0 1.3    # monomer-monomer
-pair_coeff 1 2 lj/cut 1.0 1.3    # monomer-dummy
-pair_coeff 2 2 lj/cut 1.0 1.3    # dummy-dummy
+pair_coeff 1 2 lj/cut 1.0 1.3    # monomer-donor
+pair_coeff 1 3 lj/cut 0.0 1.3    # monomer-h_dummy (off)
+pair_coeff 1 4 lj/cut 1.0 1.3    # monomer-acceptor
 
-# No WCA for any patch-involving interactions
-pair_coeff 1 3 lj/cut 0.0 1.3    # monomer-patch (off)
-pair_coeff 2 3 lj/cut 0.0 1.3    # dummy-patch (off, rigid only)
-pair_coeff 3 3 lj/cut 0.0 1.3    # patch-patch has no WCA baseline
+
+pair_coeff 2 2 lj/cut 1.0 1.3    # donor-donor
+pair_coeff 2 3 lj/cut 1.0 1.3    # donor-h_dummy
+pair_coeff 2 4 lj/cut 0.0 1.3    # donor-acceptor
+
+pair_coeff 3 3 lj/cut 1.0 1.3    # h_dummy-h_dummy
+pair_coeff 3 4 lj/cut 1.0 1.3    # h_dummy-acceptor
+
+pair_coeff 4 4 lj/cut 1.0 1.3    # acceptor-acceptor
 
 pair_modify shift yes
 
-# Gaussian attraction only between patches
-pair_coeff 3 3 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0
+# hydrogen bonding potential (DREIDING)
+pair_coeff 2 4 hbond/dreiding/lj 3 i ${hbond_energy_scale} 0.8 4 0.8 2.0 90.0
 
 
-
-
-# needed for rigid body definition
-group functional type 2 3
-fix rigidbond functional rigid/nve/small molecule
-
-
-write_data data/data.replicated_particles # for visualization in OVITO
-
-# save potential as a file (DEBUGGING)
-# pair_write 1 1 1000 r 0.01 2.0 data/pair_coeff_1_1.txt BACKBONE_BACKBONE
-# pair_write 1 2 1000 r 0.01 2.0 data/pair_coeff_1_2.txt BACKBONE_PATCH
-# pair_write 2 2 1000 r 0.01 2.0 data/pair_coeff_2_2.txt PATCH_PATCH
 
 
 # neighbor list (not too sure why we need this)
-neighbor 0.3 bin
+neighbor 2.5 bin
 neigh_modify every 1 delay 0 check yes
 
 # Energy minimization to relax overlaps (is this necessary?)
@@ -114,21 +108,24 @@ reset_timestep 0
 # displace_atoms all move 0.0 0.0 0.0 units box
 # dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
 
-# mean squared displacement for diffusion calculations
-compute MSD all msd
-fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_equil.dat mode scalar
 
+# write LJ potentials
+# pair_write 2 4 500 r 0.01 3.0 data/pair_hbond.dat HBND
 
 # initial velocities for equilibration
 timestep 0.005 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
 velocity all create 1.0 1 # initial temperature 1.0, random seed 1
-fix 1 monomer nvt temp 1.0 1.0 $(100.0*dt) # NVT ensemble, temp 1.0, damping parameter $(100.0*dt) ONLY backbone beads
+fix 1 all nvt temp 1.0 1.0 $(100.0*dt) # NVT ensemble, temp 1.0, damping parameter $(100.0*dt) ONLY backbone beads
 print "damping coefficient is $(100.0*dt)"
 # fix 1 all nve # integrate with NVE ensemble
 
-dump 2 all atom 10 data/dump.equil.lammpstrj
+
+# mean squared displacement for diffusion calculations
+compute MSD all msd
+fix msd_avg all ave/time 10 1 10 c_MSD[4] file ${output_file} mode scalar
+
 thermo 100
-run 10000
+run 150000  # TODO: change this back
 
 # equilibration done, now run NVT ensemble with thermostat
 # unfix 1
@@ -138,16 +135,23 @@ run 10000
 # undump aminepos
 # reset_timestep 0
 
+
 # compute MSD all msd
 # fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_nvt.dat mode scalar
 
-# displace_atoms all move 0.0 0.0 0.0 units box
-dump aminepos patch custom 10 data/amine_positions.lammpstrj id type x y z
+group reversible type 2 4
+# displace_atoms all move 0.0 0.0 0.0 units box\
+# dump reversible donor custom 10 data/amine_positions.lammpstrj id type x y z # TODO: change this back
+compute hb all pair hbond/dreiding/lj
+variable n_hbond equal c_hb[1] #number hbonds
+variable E_hbond equal c_hb[2] #hbond energy
+# thermo_style custom step temp epair press v_n_hbond v_E_hbond # TODO: change this back
 # fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
 # dump 3 all atom 10 data/dump.nvt.lammpstrj
+# dump 2 all atom 10 data/dump.equil.lammpstrj
 timestep 0.005
 thermo 100
-run 20000
+run 300000
 
 
 
