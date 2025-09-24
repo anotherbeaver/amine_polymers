@@ -7,7 +7,7 @@ units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
 boundary p p p
 atom_style bond 
-log logs/log.amine_polymers
+# log logs/log.amine_polymers # TODO: change this back
 
 variable N equal 500
 # variable N equal 20
@@ -21,7 +21,8 @@ variable patch_gauss_B_width equal 2.6315789474 # C type
 
 variable patch_gauss_A_strength equal 0 # strength of Gaussian attraction between amine patches
 
-variable hbond_energy_scale equal 100.0 # strength of hydrogen bond interaction between amine patches
+# variable hbond_energy_scale equal 100.0 # strength of hydrogen bond interaction between amine patches
+# TODO: currently this is being set by run.sh, turn it back when done testing
 
 # initial configuration
 # read_data data/data.particles
@@ -48,7 +49,8 @@ mass 2 1.0 # donor mass
 mass 3 1.0 # h_dummy mass
 mass 4 1.0 # acceptor mass
 
-write_data data/data.replicated_particles # for visualization in OVITO 
+# write_data data/data.replicated_particles # for visualization in OVITO 
+# TODO: change this back
 
 
 
@@ -120,7 +122,7 @@ print "damping coefficient is $(100.0*dt)"
 
 # mean squared displacement for diffusion calculations
 compute MSD all msd
-fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd/msd_log.dat mode scalar
+fix msd_avg all ave/time 10 1 10 c_MSD[4] file ${output_file} mode scalar
 
 thermo 100
 run 150000  # TODO: change this back
@@ -143,10 +145,10 @@ group reversible type 2 4
 compute hb all pair hbond/dreiding/lj
 variable n_hbond equal c_hb[1] #number hbonds
 variable E_hbond equal c_hb[2] #hbond energy
-# thermo_style custom step temp epair press v_n_hbond v_E_hbond
+# thermo_style custom step temp epair press v_n_hbond v_E_hbond # TODO: change this back
 # fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
 # dump 3 all atom 10 data/dump.nvt.lammpstrj
-dump 2 all atom 10 data/dump.equil.lammpstrj
+# dump 2 all atom 10 data/dump.equil.lammpstrj
 timestep 0.005
 thermo 100
 run 300000

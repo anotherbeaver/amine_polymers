@@ -1,6 +1,13 @@
+"""
+Compute bond lifetimes from bond formation and breaking data.
+
+Note that this was for the older amine bond definition based on distance.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 
 
 def compute_bond_lifetimes(data, timestep_size=10):

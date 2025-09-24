@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LAMMPS=../lammps/build/lmp
-INPUT=in.amine_polymers
+INPUT=in.amine_polymers_sh
 LOGDIR=logs
 
 mkdir -p "$LOGDIR"
