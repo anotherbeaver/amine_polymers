@@ -9,8 +9,8 @@ boundary p p p
 atom_style bond 
 log logs/log.amine_polymers
 
-variable N equal 500
-# variable N equal 20
+# variable N equal 500
+variable N equal 20
 variable BOX_SIZE equal 40
 
 # variable patch_bond_r0 equal 0.9  # A type
@@ -143,7 +143,7 @@ group reversible type 2 4
 compute hb all pair hbond/dreiding/lj
 variable n_hbond equal c_hb[1] #number hbonds
 variable E_hbond equal c_hb[2] #hbond energy
-# thermo_style custom step temp epair press v_n_hbond v_E_hbond
+thermo_style custom step temp epair press v_n_hbond v_E_hbond
 # fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
 # dump 3 all atom 10 data/dump.nvt.lammpstrj
 dump 2 all atom 10 data/dump.equil.lammpstrj
