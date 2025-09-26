@@ -64,7 +64,7 @@ def save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes.csv'):
 
 if __name__ == "__main__":
     # Specify the path to your CSV file
-    csv_file_path = 'data/amine_bonds_A.csv'
+    csv_file_path = 'data/amine_bonds.csv'
 
     # Read the CSV file into a pandas DataFrame
     data = pd.read_csv(csv_file_path, sep=r'\s+')
@@ -82,33 +82,10 @@ if __name__ == "__main__":
 
     print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} timesteps")
 
-    save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes_A.csv')
+    save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes.csv')
 
-    # graph histogram of bond lifetimes
-    plot_bond_lifetimes(bond_lifetimes, title='Bond Lifetimes Histogram (Type A)')
+    
 
-    csv_file_path = 'data/amine_bonds_C.csv'
-
-
-    # Read the CSV file into a pandas DataFrame
-    data = pd.read_csv(csv_file_path, sep=r'\s+')
-
-    # print(data.head())
-    # print(data.columns)
-
-    # sort id1, id2 so that (id1, id2) and (id2, id1) are treated the same
-    data[['id1', 'id2']] = pd.DataFrame(
-        np.sort(data[['id1', 'id2']].values, axis=1),
-        index=data.index
-    )
-
-    bond_lifetimes, bond_timesteps = compute_bond_lifetimes(data)
-
-    print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} timesteps")
-
-    save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes_C.csv')
-
-    # graph histogram of bond lifetimes
-    plot_bond_lifetimes(bond_lifetimes, title='Bond Lifetimes Histogram (Type C)')
+    
 
 

@@ -19,7 +19,7 @@ variable patch_bond_r0 equal 0.45  # C type
 # variable patch_gauss_B_width equal 13.8504255125 # A type
 variable patch_gauss_B_width equal 2.6315789474 # C type
 
-variable patch_gauss_A_strength equal 150 # strength of Gaussian attraction between amine patches
+variable patch_gauss_A_strength equal 75 # strength of Gaussian attraction between amine patches
 
 # initial configuration
 # read_data data/data.particles

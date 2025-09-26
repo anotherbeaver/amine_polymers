@@ -123,7 +123,7 @@ def compute_reversible_bonds(traj_file, minimum_distance=0.5, box=(40,40,40), ma
 if __name__ == "__main__":
     # Example usage
     start = time()
-    df = compute_reversible_bonds("data/amine_positions.lammpstrj", minimum_distance=(0.19*2), box=(40,40,40), max_workers=4)
+    df = compute_reversible_bonds("data/amine_positions.lammpstrj", minimum_distance=(1.0), box=(40,40,40), max_workers=10)
     df.to_csv("data/amine_bonds.csv", index=False, sep=' ')
     print(f"Total time: {time() - start:.2f} seconds")
     print(df.head())
