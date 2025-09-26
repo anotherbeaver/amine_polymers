@@ -9,7 +9,7 @@ boundary p p p
 atom_style bond 
 log logs/log.amine_polymers 
 
-variable N equal 200
+variable N equal 400
 # variable N equal 10
 variable BOX_SIZE equal 40
 
@@ -19,7 +19,7 @@ variable patch_bond_r0 equal 0.45  # C type
 # variable patch_gauss_B_width equal 13.8504255125 # A type
 variable patch_gauss_B_width equal 2.6315789474 # C type
 
-variable patch_gauss_A_strength equal 150 # strength of Gaussian attraction between amine patches
+# variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches # TODO: change back
 
 # initial configuration
 # read_data data/data.particles
@@ -82,7 +82,7 @@ reset_timestep 0
 
 # mean squared displacement for diffusion calculations
 compute MSD all msd
-fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_equil.dat mode scalar
+fix msd_avg all ave/time 10 1 10 c_MSD[4] file ${output_file} mode scalar
 
 
 # initial velocities for equilibration
@@ -92,7 +92,6 @@ fix 1 all nvt temp 1.0 1.0 $(100.0*dt) # NVT ensemble, temp 1.0, damping paramet
 print "damping coefficient is $(100.0*dt)"
 # fix 1 all nve # integrate with NVE ensemble
 
-dump 2 all atom 10 data/dump.equil.lammpstrj
 thermo 100
 run 10000
 
@@ -109,11 +108,13 @@ run 10000
 
 # displace_atoms all move 0.0 0.0 0.0 units box
 dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+dump 2 all atom 10 data/dump.equil.lammpstrj # only dump after equilibration
+
 # fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
 # dump 3 all atom 10 data/dump.nvt.lammpstrj
 timestep 0.005
 thermo 100
-run 100000
+run 500000
 
 
 

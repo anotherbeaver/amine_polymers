@@ -10,3 +10,4 @@ data/pair_coeff_1_1.txt
 data/pair_coeff_1_2.txt
 data/pair_coeff_2_2.txt
 *.csv
+my_env
