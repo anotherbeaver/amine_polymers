@@ -12,20 +12,13 @@ log logs/log.amine_polymers
 variable N equal 200
 # variable N equal 10
 variable BOX_SIZE equal 40
-
 # variable patch_bond_r0 equal 0.9  # A type
 variable patch_bond_r0 equal 0.45  # C type
-
 # variable patch_gauss_B_width equal 13.8504255125 # A type
 variable patch_gauss_B_width equal 2.6315789474 # C type
-
 variable patch_gauss_A_strength equal 75 # strength of Gaussian attraction between amine patches
 
 # initial configuration
-# read_data data/data.particles
-# replicate 5 10 10
-
-# trying with molecule file instead
 region box block 0 ${BOX_SIZE} 0 ${BOX_SIZE} 0 ${BOX_SIZE}
 create_box 2 box bond/types 2 extra/bond/per/atom 4 extra/special/per/atom 20
 
@@ -58,12 +51,6 @@ group amine type 2
 
 write_data data/data.replicated_particles # for visualization in OVITO
 
-# save potential as a file (DEBUGGING)
-# pair_write 1 1 1000 r 0.01 2.0 data/pair_coeff_1_1.txt BACKBONE_BACKBONE
-# pair_write 1 2 1000 r 0.01 2.0 data/pair_coeff_1_2.txt BACKBONE_PATCH
-# pair_write 2 2 1000 r 0.01 2.0 data/pair_coeff_2_2.txt PATCH_PATCH
-
-
 # neighbor list (not too sure why we need this)
 neighbor 0.3 bin
 neigh_modify every 1 delay 0 check yes
@@ -72,13 +59,6 @@ neigh_modify every 1 delay 0 check yes
 min_style cg             # conjugate gradient (good default)
 minimize 1.0e-6 1.0e-8 10000 100000
 reset_timestep 0
-
-# track transient bonds
-# compute amine_pairs amine pair/local id1 id2 dist 
-# dump 1 amine local 10 data/amine_bonds.dat c_amine_pairs[*]
-# group all_atoms type 1 2
-# displace_atoms all move 0.0 0.0 0.0 units box
-# dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
 
 # mean squared displacement for diffusion calculations
 compute MSD all msd
@@ -90,32 +70,14 @@ timestep 0.005 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
 velocity all create 1.0 1 # initial temperature 1.0, random seed 1
 fix 1 all nvt temp 1.0 1.0 $(100.0*dt) # NVT ensemble, temp 1.0, damping parameter $(100.0*dt)
 print "damping coefficient is $(100.0*dt)"
-# fix 1 all nve # integrate with NVE ensemble
 
 dump 2 all atom 10 data/dump.equil.lammpstrj
 thermo 100
 run 10000
 
-# equilibration done, now run NVT ensemble with thermostat
-# unfix 1
-# unfix msd_avg
-# undump 2
-# uncompute MSD
-# undump aminepos
-# reset_timestep 0
-
-# compute MSD all msd
-# fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_nvt.dat mode scalar
-
-# displace_atoms all move 0.0 0.0 0.0 units box
 dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
-# fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
-# dump 3 all atom 10 data/dump.nvt.lammpstrj
 timestep 0.005
 thermo 100
-run 100000
-
-
-
+run 400000
 
 print "Ending in.amine_polymers"
