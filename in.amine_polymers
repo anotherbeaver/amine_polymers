@@ -17,15 +17,15 @@ boundary p p p
 atom_style bond 
 log logs/log.amine_polymers 
 
-variable N equal 200
+variable N equal 300
 # variable N equal 10
 variable BOX_SIZE equal 40
 # variable patch_bond_r0 equal 0.9  # A type
 variable patch_bond_r0 equal 0.45  # C type
 # variable patch_gauss_B_width equal 13.8504255125 # A type
 variable patch_gauss_B_width equal 2.6315789474 # C type
-variable patch_gauss_A_strength equal 75 # strength of Gaussian attraction between amine patches
-variable tau equal 10 # number of timesteps before rev. bond processing, too high --> inaccurate
+variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches
+# variable tau equal 10 # number tof timesteps before rev. bond processing, too high --> inaccurate
 
 # initial configuration
 region box block 0 ${BOX_SIZE} 0 ${BOX_SIZE} 0 ${BOX_SIZE}
@@ -86,6 +86,7 @@ dump 2 all atom 10 data/dump.lammpstrj
 # run
 dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
 timestep 0.005
+thermo_style custom step temp epair emol etotal press pxy
 thermo 100
 run 400000
 
