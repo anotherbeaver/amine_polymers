@@ -64,10 +64,10 @@ def save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes.csv'):
 
 if __name__ == "__main__":
     # Specify the path to your CSV file
-    csv_file_path = 'data/amine_bonds.csv'
+    csv_file_path = 'data/amine_bonds_50.0.csv'
 
     # Read the CSV file into a pandas DataFrame
-    data = pd.read_csv(csv_file_path, sep=r'\s+')
+    data = pd.read_csv(csv_file_path, delimiter=' ')
 
     # print(data.head())
     # print(data.columns)

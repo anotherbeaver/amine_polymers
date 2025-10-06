@@ -90,9 +90,8 @@ lmp.command(f"fix 1 all nvt temp 1.0 1.0 {0.5*0.005}")
 lmp.command("dump 2 all atom 10 data/dump.lammpstrj")
 lmp.command("dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z")
 
-# --------------------------
+
 # Bond update function
-# --------------------------
 def update_bonds(lmp):
     global bonded_pairs
     types = lmp.numpy.extract_atom("type")
@@ -126,9 +125,8 @@ def update_bonds(lmp):
 
     print(f"[Python] created {len(new_bonds)} bonds, kept {len(bonds_to_keep)} existing bonds")
 
-# --------------------------
+
 # Main simulation loop
-# --------------------------
 steps_remaining = TOTAL_STEPS
 while steps_remaining > 0:
     steps = min(STEPS_PER_UPDATE, steps_remaining)

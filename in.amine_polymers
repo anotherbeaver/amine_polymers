@@ -2,13 +2,13 @@
 
 print "Starting in.amine_polymers"
 
-python post_force_callback here """
-from lammps import lammps
+# python post_force_callback here """
+# from lammps import lammps
 
-def post_force_callback(lammps_ptr, vflag):
-    lmp = lammps(ptr=lammps_ptr)
-    # access LAMMPS state using Python interface
-"""
+# def post_force_callback(lammps_ptr, vflag):
+#     lmp = lammps(ptr=lammps_ptr)
+#     # access LAMMPS state using Python interface
+# """
 
 # simulation parameters
 units lj    #  Lennard-Jones units, essentially unitless
@@ -69,7 +69,7 @@ min_style cg             # conjugate gradient (good default)
 minimize 1.0e-6 1.0e-8 10000 100000
 reset_timestep 0
 
-fix pf all python/invoke ${tau} post_force post_force_callback
+# fix pf all python/invoke ${tau} post_force post_force_callback
 
 
 # initial velocities for equilibration
@@ -83,10 +83,10 @@ dump 2 all atom 10 data/dump.lammpstrj
 # thermo 100
 # run 10000
 
-# # run
-# dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
-# timestep 0.005
-# thermo 100
-# run 400000
+# run
+dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+timestep 0.005
+thermo 100
+run 400000
 
 print "Ending in.amine_polymers"

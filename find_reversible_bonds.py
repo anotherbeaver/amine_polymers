@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import pandas as pd
 from concurrent.futures import ProcessPoolExecutor
@@ -121,9 +122,22 @@ def compute_reversible_bonds(traj_file, minimum_distance=0.5, box=(40,40,40), ma
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Compute reversible bonds from LAMMPS trajectory")
+    parser.add_argument("--traj", type=str, default="data/amine_positions.lammpstrj",
+                        help="Input LAMMPS trajectory file")
+    parser.add_argument("--output", type=str, default="data/amine_bonds.csv",
+                        help="Output CSV file for bond data")
+    parser.add_argument("--min_dist", type=float, default=1.3,
+                        help="Minimum distance to consider a bond")
+    parser.add_argument("--box", type=float, nargs=3, default=(40,40,40),
+                        help="Simulation box dimensions (x y z)")
+    parser.add_argument("--max_workers", type=int, default=4,
+                        help="Maximum number of parallel workers")
+    args = parser.parse_args()
+
     # Example usage
     start = time()
-    df = compute_reversible_bonds("data/amine_positions.lammpstrj", minimum_distance=(1.07), box=(40,40,40), max_workers=10)
-    df.to_csv("data/amine_bonds.csv", index=False, sep=' ')
+    df = compute_reversible_bonds(args.traj, minimum_distance=args.min_dist, box=args.box, max_workers=args.max_workers)
+    df.to_csv(args.output, index=False, sep=' ')
     print(f"Total time: {time() - start:.2f} seconds")
     print(df.head())
