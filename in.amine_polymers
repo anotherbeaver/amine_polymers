@@ -14,10 +14,10 @@ print "Starting in.amine_polymers"
 units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
 boundary p p p
-atom_style bond 
-log logs/log.amine_polymers 
+atom_style bond
+log logs/log.amine_polymers
 
-variable N equal 300
+variable N equal 1
 # variable N equal 10
 variable BOX_SIZE equal 40
 # variable patch_bond_r0 equal 0.9  # A type
@@ -86,8 +86,10 @@ dump 2 all atom 10 data/dump.lammpstrj
 # run
 dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
 timestep 0.005
+# compute 1 1 pressure NULL # only compute pressure for type 1 atoms (monomers)
+fix 2 all ave/time 1 1 10 c_thermo_press[4] file logs/baseline_press.dat # save p_xy to file every 10 timesteps
 thermo_style custom step temp epair emol etotal press pxy
-thermo 100
-run 400000
+thermo 100 
+run 1000000
 
 print "Ending in.amine_polymers"

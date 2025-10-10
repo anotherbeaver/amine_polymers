@@ -14,12 +14,12 @@ variable N equal 300
 variable BOX_SIZE equal 40
 
 # variable patch_bond_r0 equal 0.9  # A type
-variable patch_bond_r0 equal 0.2  # C type # TODO: change back
+# variable patch_bond_r0 equal 0.2  # C type # TODO: change back
 
 # variable patch_gauss_B_width equal 13.8504255125 # A type
 variable patch_gauss_B_width equal 2.6315789474 # C type
 
-# variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches
+# variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches # TODO: change back
 
 # initial configuration
 # read_data data/data.particles
@@ -107,13 +107,16 @@ run 10000
 # fix msd_avg all ave/time 10 1 10 c_MSD[4] file logs/msd_vector_nvt.dat mode scalar
 
 # displace_atoms all move 0.0 0.0 0.0 units box
-dump aminepos amine custom 10 ${output_file} id type x y z
+# dump aminepos amine custom 10 ${output_file} id type x y z
 dump 2 all atom 10 data/dump.equil.lammpstrj # only dump after equilibration
 
-# fix 2 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
-# dump 3 all atom 10 data/dump.nvt.lammpstrj
-timestep 0.005
+# run
+# dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+timestep 0.001
+# compute 1 1 pressure NULL # only compute pressure for type 1 atoms (monomers)
+fix 2 all ave/time 1 1 10 c_thermo_press[4] file ${output_file} # save p_xy to file every 10 timesteps
+thermo_style custom step temp epair emol etotal press pxy
 thermo 100
-run 100000
+run 1000000
 
 print "Ending in.amine_polymers"
