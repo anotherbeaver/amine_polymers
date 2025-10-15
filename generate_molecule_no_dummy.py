@@ -13,7 +13,7 @@ import argparse
 def generate_molecule_file(filename='data/polymer.molecule',
                            chain_length=25,
                            amine_spacing=5,
-                           backbone_to_patch=0.4):
+                           backbone_to_patch=0.45):
     
     BOX_X = chain_length + 2 # length of monomer-monomer distances with extra padding (1)
     BOX_Y = 2.45 # height of one monomer-monomer distance (1) + patch height (.45) + padding (1)
@@ -65,6 +65,8 @@ def generate_molecule_file(filename='data/polymer.molecule',
             patch_id = chain_length + idx + 1
             f.write(f"{chain_length - 1 + idx * 2} 2 {pos + 1} {patch_id}\n")
 
+    return filename
+
 def generate_chain_positions():
     """
     Generate positions for chains of particles.
@@ -91,9 +93,10 @@ if __name__ == "__main__":
     args.add_argument('--backbone_to_patch', type=float, default=0.4, help='Distance from backbone to patch')
     args = args.parse_args()
     print(args)
-    generate_molecule_file(
+    fname = generate_molecule_file(
         filename=args.filename,
         chain_length=args.chain_length,
         amine_spacing=args.amine_spacing,
         backbone_to_patch=args.backbone_to_patch
     )
+    print(f"Generated molecule file: {fname}")

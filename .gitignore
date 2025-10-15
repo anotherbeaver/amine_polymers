@@ -11,3 +11,9 @@ data/pair_coeff_1_2.txt
 data/pair_coeff_2_2.txt
 *.csv
 my_env
+!logs/patch_n_1_60_0.45.dat 
+!logs/patch_n_1_55_0.45.dat 
+!logs/patch_n_1_50_0.45.dat 
+!logs/patch_n_1_45_0.45.dat 
+!logs/patch_n_1_40_0.45.dat 
+!logs/patch_n_1_35_0.45.dat

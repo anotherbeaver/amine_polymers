@@ -127,7 +127,7 @@ if __name__ == "__main__":
                         help="Input LAMMPS trajectory file")
     parser.add_argument("--output", type=str, default="data/amine_bonds.csv",
                         help="Output CSV file for bond data")
-    parser.add_argument("--min_dist", type=float, default=1.3,
+    parser.add_argument("--min_dist", type=float, default=0.6,
                         help="Minimum distance to consider a bond")
     parser.add_argument("--box", type=float, nargs=3, default=(40,40,40),
                         help="Simulation box dimensions (x y z)")

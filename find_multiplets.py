@@ -35,8 +35,8 @@ def find_multiplets_to_csv(data, output_csv):
             seen_groups = set()
 
             for center, neighbors in adjacency.items():
-                if len(neighbors) < 2:
-                    continue
+                # if len(neighbors) < 2:
+                #     continue
 
                 # Create a sorted tuple of all atom IDs to ensure uniqueness
                 group_ids = tuple(sorted([center] + [n[0] for n in neighbors]))

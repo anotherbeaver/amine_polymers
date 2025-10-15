@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 LAMMPS=../lammps/build/lmp
 INPUT=in.amine_polymers_sh
 LOGDIR=logs
@@ -12,16 +13,20 @@ mkdir -p "$LOGDIR"
 # lengths=(0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7)
 # lengths=(0.6 0.65 0.7)
 
-scales=(0 40 50 60)
+# scales=(0 40 50 60)
 # scales=(0)
+scales=(35 40 45 50 55 60 75 80)
 # scales=(50)
 
-lengths=(0.2 0.3 0.4 0.5 0.6 0.7)
-# lengths=(0.2 0.3)
-# lengths=(0.5)
 
-n_patch=(1 2 3 4)
-# n_patch=(3)
+
+# lengths=(0.2 0.3 0.4 0.5 0.6 0.7)
+# lengths=(0.2 0.4 0.6)
+# lengths=(0.2 0.3)
+lengths=(0.45)
+
+n_patch=(1 2 3 4 5)
+# n_patch=(5)
 
 
 for n in "${n_patch[@]}"; do
@@ -44,34 +49,43 @@ echo "All LAMMPS jobs finished."
 
 
 
-# core=0
+# # Process each energy scale sequentially
 # for scale in "${scales[@]}"; do
-#   echo "Launching hbond_energy_scale=$scale on cores $core and $((core+1))"
-#   taskset -c $core,$((core+1)) mpirun -np 2 --bind-to core \
-#     "$LAMMPS" -in "$INPUT" \
-#     -var patch_gauss_A_strength "$scale" \
-#     -var output_file "$LOGDIR/energy_${scale}.lammpstrj" &
-#   core=$((core+2))
-# done
-
-# wait
-# echo "All LAMMPS jobs finished."
-
-# for scale in "${scales[@]}"; do
-#   # find the bonds
-#   python3 find_reversible_bonds.py --traj "data/energy_${scale}.lammpstrj" --output "data/amine_bonds_${scale}.csv"
-# done
-
-# wait
-# echo "All bond finding jobs finished."
-
-# for scale in "${scales[@]}"; do
-#   # find multiple bonds
+#   echo "========================================="
+#   echo "Processing energy scale: $scale"
+#   echo "========================================="
+  
+#   # # Step 1: Run LAMMPS simulation
+#   # echo "Step 1/4: Running LAMMPS simulation for scale $scale"
+#   # mpirun -np 12 --oversubscribe \
+#   #   "$LAMMPS" -in "$INPUT" \
+#   #   -var patch_gauss_A_strength "$scale" \
+#   #   -var output_file "$LOGDIR/energy_${scale}.lammpstrj"
+  
+#   # echo "LAMMPS simulation completed successfully for scale $scale"
+  
+#   # # Step 2: Find bonds
+#   # echo "Step 2/4: Finding bonds for scale $scale"
+#   # python3 find_reversible_bonds.py --traj "logs/energy_${scale}.lammpstrj" --output "data/amine_bonds_${scale}.csv"
+  
+#   # echo "Bond finding completed successfully for scale $scale"
+  
+#   # Step 3: Find multiplets
+#   echo "Step 3/4: Finding multiplets for scale $scale"
 #   output_csv="data/amine_multiplets_${scale}.csv"
 #   python3 find_multiplets.py --input "data/amine_bonds_${scale}.csv" --output "$output_csv"
-#   echo "Job with hbond_energy_scale=$scale completed."
+  
+#   echo "Multiplet finding completed successfully for scale $scale"
+
+#   echo "Step 4/4: Calculating bond lifetimes for scale $scale"
+#   python3 calc_bond_lifetime.py --csv_file "data/amine_bonds_${scale}.csv" --output "data/bond_lifetimes_${scale}.csv"
+#   echo "Bond lifetime calculation completed successfully for scale $scale"
+
+#   echo "All processing completed for energy scale $scale"
+#   echo ""
 # done
 
-# wait
-# echo "All jobs finished."
+# echo "========================================="
+# echo "All energy scales processed successfully!"
+# echo "========================================="
 

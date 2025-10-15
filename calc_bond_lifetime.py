@@ -1,3 +1,4 @@
+import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -64,7 +65,15 @@ def save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes.csv'):
 
 if __name__ == "__main__":
     # Specify the path to your CSV file
-    csv_file_path = 'data/amine_bonds_50.0.csv'
+    args = argparse.ArgumentParser("Compute bond lifetimes from bond data CSV")
+    args.add_argument("--csv_file", type=str, default='data/amine_bonds.csv')
+    args.add_argument("--output", type=str, default='data/bond_lifetimes.csv',
+                        help="Output CSV file for bond lifetimes")
+    
+    args = args.parse_args()
+
+    csv_file_path = args.csv_file
+    output_file_path = args.output
 
     # Read the CSV file into a pandas DataFrame
     data = pd.read_csv(csv_file_path, delimiter=' ')
@@ -82,7 +91,7 @@ if __name__ == "__main__":
 
     print(f"Average bond lifetime: {np.mean([lifetime for lifetimes in bond_lifetimes.values() for lifetime in lifetimes]):.2f} timesteps")
 
-    save_bond_lifetimes(bond_lifetimes, filename='data/bond_lifetimes.csv')
+    save_bond_lifetimes(bond_lifetimes, filename=output_file_path)
 
     
 

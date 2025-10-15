@@ -13,11 +13,9 @@ variable N equal 300
 # variable N equal 10
 variable BOX_SIZE equal 40
 
-# variable patch_bond_r0 equal 0.9  # A type
-# variable patch_bond_r0 equal 0.2  # C type # TODO: change back
+# variable patch_bond_r0 equal 0.45
 
-# variable patch_gauss_B_width equal 13.8504255125 # A type
-variable patch_gauss_B_width equal 2.6315789474 # C type
+variable patch_gauss_B_width equal 13.8504255125
 
 # variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches # TODO: change back
 
@@ -39,13 +37,13 @@ bond_style harmonic
 bond_coeff 1 50.0 1.0 # k, r0 # backbone stiffness
 # k is derived from Raffaeilli and Ellenbroek, Soft Matter 2021
 # "...polymer backbones have a stiffness of 50e/b^2..."
-bond_coeff 2 1000 ${patch_bond_r0} # stiff spring on patches
+bond_coeff 2 5000 ${patch_bond_r0} # stiff spring on patches
 # NOTE: THIS IS WHERE A/C DIFFERENCE IS (0.9 vs 0.45)
 
 # interatomic potentials (non-bonded)
 pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0 # cutoff for both at 2.0
 pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
-pair_coeff 1 2 lj/cut 1.0 1.3  # WCA between backbone and amine patches
+pair_coeff 1 2 lj/cut 0.0 1.3  # WCA between backbone and amine patches
 pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
 pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
@@ -108,11 +106,11 @@ reset_timestep 0
 
 # displace_atoms all move 0.0 0.0 0.0 units box
 # dump aminepos amine custom 10 ${output_file} id type x y z
-# dump 2 all atom 10 data/dump.equil.lammpstrj # only dump after equilibration #TODO: bring this back when the simulation isn't massive
+dump 2 all atom 10 data/dump.equil.lammpstrj # only dump after equilibration #TODO: bring this back when the simulation isn't massive
 
 
 # run
-# dump aminepos amine custom 10 data/amine_positions.lammpstrj id type x y z
+# dump aminepos amine custom 10 ${output_file} id type x y z
 timestep 0.001
 # compute 1 1 pressure NULL # only compute pressure for type 1 atoms (monomers)
 fix 2 all ave/time 1 1 10 c_thermo_press[4] file ${output_file} # save p_xy to file every 10 timesteps
