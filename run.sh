@@ -15,8 +15,8 @@ mkdir -p "$LOGDIR"
 
 # scales=(0 40 50 60)
 # scales=(0)
-scales=(35 40 45 50 55 60 75 80)
-# scales=(50)
+# scales=(35 40 45 50 55 60 75 80)
+scales=(50)
 
 
 
@@ -25,8 +25,8 @@ scales=(35 40 45 50 55 60 75 80)
 # lengths=(0.2 0.3)
 lengths=(0.45)
 
-n_patch=(1 2 3 4 5)
-# n_patch=(5)
+# n_patch=(1 2 3 4 5)
+n_patch=(5)
 
 
 for n in "${n_patch[@]}"; do

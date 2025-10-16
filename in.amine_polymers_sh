@@ -113,9 +113,14 @@ dump 2 all atom 10 data/dump.equil.lammpstrj # only dump after equilibration #TO
 # dump aminepos amine custom 10 ${output_file} id type x y z
 timestep 0.001
 # compute 1 1 pressure NULL # only compute pressure for type 1 atoms (monomers)
-fix 2 all ave/time 1 1 10 c_thermo_press[4] file ${output_file} # save p_xy to file every 10 timesteps
+# fix 2 all ave/time 1 1 10 c_thermo_press[4] file ${output_file} # save p_xy to file every 10 timesteps
+# fix 2 all ave/correlate/long 5 1000 c_thermo_press[4] file ${output_file} # save p_xy to file every 10 timesteps
+# fix corr all ave/correlate 1 100 10000 c_thermo_press[4] type auto ave running file ${output_file}
+# fix corr all ave/correlate 1 100 10000 c_thermo_press[4] type auto ave running file Gt.dat
+fix corr all ave/correlate/long 1 10000 c_thermo_press[4] type auto file Gt_long.dat ncorr 25 nlen 16 ncount 2
+# variable 
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
-run 1000000
+run 500000
 
 print "Ending in.amine_polymers"
