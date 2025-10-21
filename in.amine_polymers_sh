@@ -12,9 +12,16 @@ log logs/log.amine_polymers
 # variable BOX_SIZE equal 40 # input from run.sh
 # variable patch_bond_r0 equal 0.45 # input from run.sh
 # variable patch_gauss_B_width equal 13.8504255125 # input from run.sh
-# variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches # TODO: change back
+# variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches
 # variable output_amine_file string logs/patch_n_${patch_gauss_A_strength}_${patch_bond_r0}.dat
 
+
+# variable output_traj equal 0
+# variable output_traj_file equal "logs/dump.lammpstrj"
+# variable output_msd equal 0
+# variable output_msd_file equal "logs/msd.dat"
+# variable output_amine equal 1
+# variable output_amine_file equal "logs/amine_positions.dat"
 
 # create simulation box
 region box block 0 ${BOX_SIZE} 0 ${BOX_SIZE} 0 ${BOX_SIZE}
@@ -23,7 +30,8 @@ create_box 2 box bond/types 2 extra/bond/per/atom 4 extra/special/per/atom 20
 # polymer molecule definition
 mass 1 1.0 # backbone + dummy mass
 mass 2 1.0 # patch mass
-molecule polymer data/polymer.molecule
+molecule polymer_short data/polymer_short.molecule
+molecule polymer_long data/polymer_long.molecule
 
 # bond potentials (harmonic)
 bond_style harmonic
@@ -41,7 +49,11 @@ pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
 # create atoms
-create_atoms 0 random $N 12345 box mol polymer 12345
+# NOTE: P is the number of long polymers, so N-P short polymers
+variable Q equal ${N} - ${P}
+print "Creating $Q short polymers and $P long polymers"
+create_atoms 0 random $Q 12345 box mol polymer_short 12345
+create_atoms 0 random $P 54321 box mol polymer_long 54321
 
 # group definitions
 group monomer type 1
@@ -72,21 +84,30 @@ reset_timestep 0
 
 # save mean squared displacement data (optional)
 if "${output_msd} == 1" then &
+    "print 'Saving MSD data to ${output_msd_file}'" &
     "compute MSD all msd" &
     "fix msd_avg all ave/time 10 1 10 c_MSD[4] file ${output_msd_file} mode scalar"
 
 # save amine positions for bond analysis (optional)
 if "${output_amine} == 1" then &
+    "print 'Saving amine positions to ${output_amine_file}'" &
     "dump aminepos amine custom 10 ${output_amine_file} id type x y z"
 
 # save trajectory of all particles (optional)
 if "${output_traj} == 1" then &
+    "print 'Saving trajectory to ${output_traj_file}'" &
     "dump traj all atom 10 ${output_traj_file}"
+
+# save p_xy data for modulus calculation
+if "${output_press} == 1" then &
+    "print 'Saving pressure data to ${output_press_file}'" &
+    "fix 2 all ave/time 1 1 10 c_thermo_press[0] c_thermo_press[1] c_thermo_press[2] c_thermo_press[3] c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] file ${output_press_file}"
 
 # experiment run
 timestep 0.001 
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
-run 200000
+run 20000
+
 
 print "Ending in.amine_polymers"

@@ -16,7 +16,7 @@ def generate_molecule_file(filename='data/polymer.molecule',
                            backbone_to_patch=0.45):
     
     BOX_X = chain_length + 2 # length of monomer-monomer distances with extra padding (1)
-    BOX_Y = 2.45 # height of one monomer-monomer distance (1) + patch height (.45) + padding (1)
+    BOX_Y = 1.45 # patch height (.45) + padding (1)
     BOX_Z = 1.2 # padding (1.2)
 
 

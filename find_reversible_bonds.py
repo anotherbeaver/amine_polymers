@@ -1,124 +1,87 @@
 import argparse
 import numpy as np
 import pandas as pd
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from time import time
+from scipy.spatial import cKDTree
+import os
+
+
+def snapshot_generator(traj_file):
+    """Yields (timestep, data) tuples from a LAMMPS trajectory file without loading it all."""
+    with open(traj_file) as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            if line.startswith("ITEM: TIMESTEP"):
+                ts = int(f.readline().strip())
+                # Skip next header lines
+                while not (l := f.readline()).startswith("ITEM: NUMBER OF ATOMS"):
+                    continue
+                n_atoms = int(f.readline().strip())
+                # Skip to atom data
+                while not (l := f.readline()).startswith("ITEM: ATOMS"):
+                    continue
+                # Read atom data block
+                data = np.loadtxt([f.readline() for _ in range(n_atoms)])
+                yield ts, data
 
 
 def process_timestep(snapshot, minimum_distance, box):
     """
-    Finds all pairs within a minimum distance and returns it a as a list of lists.
-
-    Parameters:
-        snapshot (tuple): (timestep, data) where data is a NxM numpy array
-        minimum_distance (float): Distance cutoff for identifying reversible bonds
-        box (tuple): Dimensions of the simulation box (x, y, z)
-
-    Returns:
-        list of lists: Each inner list contains [timestep, id1, id2, x1, y1, z1, x2, y2, z2, distance]
+    Finds all pairs within a minimum distance using cKDTree and periodic boundaries.
     """
     ts, data = snapshot
-    ids = data[:,0].astype(int)
-    coords = data[:,2:5]
+    coords = data[:, 2:5]
+    ids = data[:, 0].astype(int)
     box = np.array(box)
 
-    print("Processing timestep:", ts)
+    print(f"Processing timestep {ts}...")
 
-    delta = coords[:, np.newaxis, :] - coords[np.newaxis, :, :]
-    delta -= np.round(delta / box) * box
-    dist_matrix = np.linalg.norm(delta, axis=-1)
+    # Build extended periodic image positions for PBC search
+    offsets = np.array([[i, j, k] for i in (-1, 0, 1)
+                                  for j in (-1, 0, 1)
+                                  for k in (-1, 0, 1)])
+    extended_coords = np.vstack([coords + offset * box for offset in offsets])
+    extended_ids = np.tile(ids, len(offsets))
 
-    a_idx, b_idx = np.triu_indices(len(ids), k=1)
-    mask = dist_matrix[a_idx, b_idx] < minimum_distance
+    tree = cKDTree(extended_coords)
+    pairs = tree.query_pairs(r=minimum_distance)
 
     results = []
-    for ia, ib in zip(a_idx[mask], b_idx[mask]):
-        results.append([
-            ts,
-            ids[ia], ids[ib],
-            coords[ia,0], coords[ia,1], coords[ia,2],
-            coords[ib,0], coords[ib,1], coords[ib,2],
-            dist_matrix[ia, ib]
-        ])
+    for ia, ib in pairs:
+        id1, id2 = extended_ids[ia], extended_ids[ib]
+        if id1 >= id2:
+            continue
+        p1, p2 = extended_coords[ia], extended_coords[ib]
+        # Minimum image convention
+        delta = p2 - p1 - np.round((p2 - p1) / box) * box
+        dist = np.linalg.norm(delta)
+        results.append([ts, id1, id2, *p1, *p2, dist])
     return results
 
-def find_smallest_dist(snapshot, box):
+
+def compute_reversible_bonds(traj_file, output_file, minimum_distance=0.5, box=(40, 40, 40), max_workers=4):
     """
-    Finds the smallest distance between all pairs of amine groups in a snapshot.
-
-    (For testing purposes)
-
-    Parameters:
-        snapshot (tuple): (timestep, data) where data is a NxM numpy array
-        box (tuple): Dimensions of the simulation box (x, y, z)
-
-    Returns:
-        tuple: (timestep, min_distance)
-    """ 
-    ts, data = snapshot
-    print("Processing timestep:", ts)
-    ids = data[:,0].astype(int)
-    coords = data[:,2:5]
-    box = np.array(box)
-
-    delta = coords[:, np.newaxis, :] - coords[np.newaxis, :, :]
-    delta -= np.round(delta / box) * box
-    dist_matrix = np.linalg.norm(delta, axis=-1)
-
-    a_idx, b_idx = np.triu_indices(len(ids), k=1)
-    min_dist = np.min(dist_matrix[a_idx, b_idx])
-    print("Minimum distance at timestep", ts, "is", min_dist)
-    return ts, min_dist
-    
-
-def compute_reversible_bonds(traj_file, minimum_distance=0.5, box=(40,40,40), max_workers=4):
+    Stream over snapshots, compute pairwise distances in parallel, and stream results to CSV.
     """
-    Compute pairwise distances between amine groups from a LAMMPS trajectory file and return as a DataFrame.
-    
-    Parameters:
-        traj_file (str): Path to the LAMMPS trajectory file
-        minimum_distance (float): Distance cutoff for identifying reversible bonds
-        box (tuple): Dimensions of the simulation box (x, y, z)
-    
-    Returns:
-        pd.DataFrame: Columns = timestep, id1, id2, x1, y1, z1, x2, y2, z2, distance
-    """
-    # read snapshots first
-    snapshots = []
-    with open(traj_file) as f:
-        lines = f.readlines()
+    header = "timestep id1 id2 x1 y1 z1 x2 y2 z2 distance\n"
+    with open(output_file, "w") as f:
+        f.write(header)
 
-    i = 0
-    while i < len(lines):
-        if lines[i].startswith("ITEM: TIMESTEP"):
-            ts = int(lines[i+1])
-            n_atoms = int(lines[i+3])
-            data_start = i + 9
-            data_end = data_start + n_atoms
-            data = np.loadtxt(lines[data_start:data_end])
-            snapshots.append((ts, data))
-            i = data_end
-        else:
-            i += 1
-
-    # parallel processing
-    results = []
+    start_time = time()
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_timestep, snap, minimum_distance, box) for snap in snapshots]
-        # futures = [executor.submit(find_smallest_dist, snap, box) for snap in snapshots]
-        for future in futures:
-            results.extend(future.result())
-            # results.append(future.result())
+        futures = []
+        for snapshot in snapshot_generator(traj_file):
+            futures.append(executor.submit(process_timestep, snapshot, minimum_distance, box))
 
-    df = pd.DataFrame(
-        results,
-        columns=["timestep","id1","id2","x1","y1","z1","x2","y2","z2","distance"]
-    )
-    # df = pd.DataFrame(
-    #     results,
-    #     columns=["timestep","min_distance"]
-    # )
-    return df
+        for future in as_completed(futures):
+            results = future.result()
+            if results:
+                df = pd.DataFrame(results)
+                df.to_csv(output_file, mode="a", index=False, header=False, sep=" ")
+    print(f"Total time: {time() - start_time:.2f} seconds")
 
 
 if __name__ == "__main__":
@@ -129,15 +92,16 @@ if __name__ == "__main__":
                         help="Output CSV file for bond data")
     parser.add_argument("--min_dist", type=float, default=0.6,
                         help="Minimum distance to consider a bond")
-    parser.add_argument("--box", type=float, nargs=3, default=(40,40,40),
+    parser.add_argument("--box", type=float, nargs=3, default=(40, 40, 40),
                         help="Simulation box dimensions (x y z)")
     parser.add_argument("--max_workers", type=int, default=4,
                         help="Maximum number of parallel workers")
     args = parser.parse_args()
 
-    # Example usage
-    start = time()
-    df = compute_reversible_bonds(args.traj, minimum_distance=args.min_dist, box=args.box, max_workers=args.max_workers)
-    df.to_csv(args.output, index=False, sep=' ')
-    print(f"Total time: {time() - start:.2f} seconds")
-    print(df.head())
+    compute_reversible_bonds(
+        args.traj,
+        args.output,
+        minimum_distance=args.min_dist,
+        box=args.box,
+        max_workers=args.max_workers
+    )

@@ -37,32 +37,73 @@ If there are parameters that need to be changed in the molecule file, change the
 LAMMPS=../lammps/build/lmp
 INPUT=in.amine_polymers_sh
 LOGDIR=logs
+DATADIR=data
 
 mkdir -p "$LOGDIR"
 
-# scales=(50.0 60.0 70.0 80.0 90.0 150.0)
-# scales=(50.0 60.0 70.0)
-# scales=(49.0 99.0 149.0 200.0 300.0 400.0)
-# lengths=(0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7)
-# lengths=(0.6 0.65 0.7)
-
-# scales=(0 40 50 60)
-# scales=(0)
-scales=(65 70 75 80)
-# scales=(50)
-patch_gauss_B_width=13.8504255125
+N=131
+P=87
+BOX_SIZE=40
 patch_bond_r0=0.45
+patch_gauss_A_strength=50
+patch_gauss_B_width=13.8504255125
 
+output_traj=0
+output_traj_file="$DATADIR/patch_trajectory.lammpstrj"
+output_msd=0
+output_msd_file="$LOGDIR/patch_msd.dat"
+output_amine=0
+output_amine_file="$LOGDIR/patch_locations.dat"
+output_press=1
+output_press_file="$LOGDIR/press_${patch_gauss_A_strength}_${P}.dat"
 
+P_values=(0 50 100 150 200 250 300)
+patch_A_strengths=(0 50 100 150)
 
-# lengths=(0.2 0.3 0.4 0.5 0.6 0.7)
-# lengths=(0.2 0.4 0.6)
-# lengths=(0.2 0.3)
-lengths=(0.45)
+echo "Generate long polymer molecule file."
+python3 generate_molecule.py --chain_length 100 --amine_spacing 1 --filename data/polymer_long.molecule
 
-# n_patch=(1 2 3 4 5)
-n_patch=(5)
+echo "Generate short polymer molecule file."
+python3 generate_molecule.py --chain_length 28 --amine_spacing 1 --filename data/polymer_short.molecule
 
+# for scale in "${patch_A_strengths[@]}"; do
+#   for P in "${P_values[@]}"; do
+#     N=$((300))
+#     echo "Running LAMMPS with N=$N, P=$P, patch_gauss_A_strength=$scale"
+    
+#     mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.amine_polymers_sh \
+#           -var N $N \
+#           -var P $P \
+#           -var BOX_SIZE $BOX_SIZE \
+#           -var patch_bond_r0 $patch_bond_r0 \
+#           -var patch_gauss_A_strength $scale \
+#           -var patch_gauss_B_width $patch_gauss_B_width \
+#           -var output_traj 0 \
+#           -var output_traj_file "$LOGDIR/patch_trajectory_P${P}.lammpstrj" \
+#           -var output_msd 0 \
+#           -var output_msd_file "$LOGDIR/patch_msd_P${P}.dat" \
+#           -var output_amine 0 \
+#           -var output_amine_file "$LOGDIR/patch_locations_P${P}_scale${scale}.dat" \
+#           -var output_press 1 \
+#           -var output_press_file "$LOGDIR/press_${scale}_${P}.dat"
+#   done
+# done
+
+mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.amine_polymers_sh \
+        -var N $N \
+        -var P $P \
+        -var BOX_SIZE $BOX_SIZE \
+        -var patch_bond_r0 $patch_bond_r0 \
+        -var patch_gauss_A_strength $patch_gauss_A_strength \
+        -var patch_gauss_B_width $patch_gauss_B_width \
+        -var output_traj $output_traj \
+        -var output_traj_file $output_traj_file \
+        -var output_msd $output_msd \
+        -var output_msd_file $output_msd_file \
+        -var output_amine $output_amine \
+        -var output_amine_file $output_amine_file \
+        -var output_press $output_press \
+        -var output_press_file $output_press_file
 
 # for n in "${n_patch[@]}"; do
 #   echo "Generating molecule with $n amine patches."
@@ -84,43 +125,43 @@ n_patch=(5)
 
 
 
-# Process each energy scale sequentially
-for scale in "${scales[@]}"; do
-  echo "========================================="
-  echo "Processing energy scale: $scale"
-  echo "========================================="
+# # Process each energy scale sequentially
+# for scale in "${scales[@]}"; do
+#   echo "========================================="
+#   echo "Processing energy scale: $scale"
+#   echo "========================================="
   
-  # Step 1: Run LAMMPS simulation
-  echo "Step 1/4: Running LAMMPS simulation for scale $scale"
-  mpirun -np 12 --oversubscribe \
-    "$LAMMPS" -in "$INPUT" \
-    -var patch_gauss_A_strength "$scale" \
-    -var output_file "$LOGDIR/energy_${scale}.lammpstrj"
+#   # Step 1: Run LAMMPS simulation
+#   echo "Step 1/4: Running LAMMPS simulation for scale $scale"
+#   mpirun -np 12 --oversubscribe \
+#     "$LAMMPS" -in "$INPUT" \
+#     -var patch_gauss_A_strength "$scale" \
+#     -var output_file "$LOGDIR/energy_${scale}.lammpstrj"
   
-  echo "LAMMPS simulation completed successfully for scale $scale"
+#   echo "LAMMPS simulation completed successfully for scale $scale"
   
-  # Step 2: Find bonds
-  echo "Step 2/4: Finding bonds for scale $scale"
-  python3 find_reversible_bonds.py --traj "logs/energy_${scale}.lammpstrj" --output "data/amine_bonds_${scale}.csv"
+#   # Step 2: Find bonds
+#   echo "Step 2/4: Finding bonds for scale $scale"
+#   python3 find_reversible_bonds.py --traj "logs/energy_${scale}.lammpstrj" --output "data/amine_bonds_${scale}.csv"
   
-  echo "Bond finding completed successfully for scale $scale"
+#   echo "Bond finding completed successfully for scale $scale"
   
-  # Step 3: Find multiplets
-  echo "Step 3/4: Finding multiplets for scale $scale"
-  output_csv="data/amine_multiplets_${scale}.csv"
-  python3 find_multiplets.py --input "data/amine_bonds_${scale}.csv" --output "$output_csv"
+#   # Step 3: Find multiplets
+#   echo "Step 3/4: Finding multiplets for scale $scale"
+#   output_csv="data/amine_multiplets_${scale}.csv"
+#   python3 find_multiplets.py --input "data/amine_bonds_${scale}.csv" --output "$output_csv"
   
-  echo "Multiplet finding completed successfully for scale $scale"
+#   echo "Multiplet finding completed successfully for scale $scale"
 
-  echo "Step 4/4: Calculating bond lifetimes for scale $scale"
-  python3 calc_bond_lifetime.py --csv_file "data/amine_bonds_${scale}.csv" --output "data/bond_lifetimes_${scale}.csv"
-  echo "Bond lifetime calculation completed successfully for scale $scale"
+#   echo "Step 4/4: Calculating bond lifetimes for scale $scale"
+#   python3 calc_bond_lifetime.py --csv_file "data/amine_bonds_${scale}.csv" --output "data/bond_lifetimes_${scale}.csv"
+#   echo "Bond lifetime calculation completed successfully for scale $scale"
 
-  echo "All processing completed for energy scale $scale"
-  echo ""
-done
+#   echo "All processing completed for energy scale $scale"
+#   echo ""
+# done
 
-echo "========================================="
-echo "All energy scales processed successfully!"
-echo "========================================="
+# echo "========================================="
+# echo "All energy scales processed successfully!"
+# echo "========================================="
 
