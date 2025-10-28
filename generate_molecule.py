@@ -54,9 +54,9 @@ def generate_molecule_file(filename='data/polymer.molecule',
             f.write(f"{patch_id} 2\n")
 
 
-        f.write("\nMasses\n\n")
-        for i in range(N):
-            f.write(f"{i+1} 1.0\n")
+        # f.write("\nMasses\n\n")
+        # for i in range(N):
+        #     f.write(f"{i+1} 1.0\n")
 
         f.write("\nBonds\n\n")
         for i in range(chain_length - 1):

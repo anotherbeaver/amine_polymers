@@ -22,6 +22,7 @@ log logs/log.amine_polymers
 # variable output_msd_file equal "logs/msd.dat"
 # variable output_amine equal 1
 # variable output_amine_file equal "logs/amine_positions.dat"
+# variable random_seed equal 12345
 
 # create simulation box
 region box block 0 ${BOX_SIZE} 0 ${BOX_SIZE} 0 ${BOX_SIZE}
@@ -52,8 +53,9 @@ pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaus
 # NOTE: P is the number of long polymers, so N-P short polymers
 variable Q equal ${N} - ${P}
 print "Creating $Q short polymers and $P long polymers"
-create_atoms 0 random $Q 12345 box mol polymer_short 12345
-create_atoms 0 random $P 54321 box mol polymer_long 54321
+variable random_seed_2 equal ${random_seed} * 7
+create_atoms 0 random $Q 12345 box mol polymer_short ${random_seed}
+create_atoms 0 random $P 54321 box mol polymer_long ${random_seed_2}
 
 # group definitions
 group monomer type 1
@@ -73,14 +75,17 @@ reset_timestep 0
 
 # initial velocities for equilibration
 timestep 0.005 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
-velocity all create 1.0 1 # initial temperature 1.0, random seed 1
-fix 1 all nvt temp 1.0 1.0 $(100.0*dt) # NVT ensemble, temp 1.0, damping parameter $(100.0*dt)
-print "damping coefficient is $(100.0*dt)"
+velocity all create 0.6 1 # initial temperature 0.6, random seed 1
+fix 1 all nvt temp 0.6 0.6 $(200.0*dt) # NVT ensemble, temp 0.6, damping parameter $(100.0*dt)
+print "damping coefficient is $(200.0*dt)"
 
 # equilibration run
 thermo 100
-run 50000
+run 500000
 reset_timestep 0
+
+unfix 1
+fix 1 all nve # switch to NVE ensemble
 
 # save mean squared displacement data (optional)
 if "${output_msd} == 1" then &
@@ -101,13 +106,27 @@ if "${output_traj} == 1" then &
 # save p_xy data for modulus calculation
 if "${output_press} == 1" then &
     "print 'Saving pressure data to ${output_press_file}'" &
-    "fix 2 all ave/time 1 1 10 c_thermo_press[0] c_thermo_press[1] c_thermo_press[2] c_thermo_press[3] c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] file ${output_press_file}"
+    "fix 2 all ave/time 10 10 100 c_thermo_press[0] c_thermo_press[1] c_thermo_press[2] c_thermo_press[3] c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] file ${output_press_file}"
+
+variable px_y equal c_thermo_press[1] - c_thermo_press[2]
+variable px_z equal c_thermo_press[1] - c_thermo_press[3]
+variable py_z equal c_thermo_press[2] - c_thermo_press[3]
+
+# fix long_corr all ave/correlate/long 1 10000 &
+#           v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] &
+#           type auto & 
+#           file "long_corr.dat" &
+#           overwrite &
+#           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
+#           ncorr 20 &
+#           nlen 16 &
+#           ncount 2
 
 # experiment run
 timestep 0.001 
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
-run 20000
+run 500000
 
 
 print "Ending in.amine_polymers"
