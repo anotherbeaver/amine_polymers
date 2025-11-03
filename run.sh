@@ -43,9 +43,18 @@ mkdir -p "$LOGDIR"
 
 # N=131
 # P=87
-N=200 # total number of polymers
+# N=2000 # total number of polymers
+# P=0 # number of long polymers
+# BOX_SIZE=43.088
+# patch_bond_r0=0.45
+# patch_gauss_A_strength=0
+# patch_gauss_B_width=13.8504255125
+# temp=1.0
+
+
+N=30 # total number of polymers
 P=0 # number of long polymers
-BOX_SIZE=20
+BOX_SIZE=7.06
 patch_bond_r0=0.45
 patch_gauss_A_strength=0
 patch_gauss_B_width=13.8504255125
@@ -61,7 +70,9 @@ output_press_file="$LOGDIR/press_${patch_gauss_A_strength}_${P}.dat"
 
 # P_values=(0 50 100 150 200 250 300)
 P_values=(0)
-patch_A_strengths=(0 40 50 60 100 150)
+# patch_A_strengths=(0 40 50 60 100 150)
+patch_A_strengths=(60)
+
 
 echo "Generate long polymer molecule file."
 python3 generate_molecule.py --chain_length 100 --amine_spacing 1 --filename data/polymer_long.molecule
@@ -70,11 +81,11 @@ echo "Generate short polymer molecule file."
 python3 generate_molecule.py --chain_length 28 --amine_spacing 1 --filename data/polymer_short.molecule
 
 echo "Generate... other... polymer molecule file."
-python3 generate_molecule.py --chain_length 25 --amine_spacing 5 --filename data/polymer.molecule
+python3 generate_molecule.py --chain_length 10 --amine_spacing 0 --filename data/polymer.molecule
 
 # for scale in "${patch_A_strengths[@]}"; do
 #   for P in "${P_values[@]}"; do
-#     N=$((300))
+# #     N=$((300))
 #     echo "Running LAMMPS with N=$N, P=$P, patch_gauss_A_strength=$scale"
     
 #     mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.amine_polymers_sh \
@@ -91,30 +102,54 @@ python3 generate_molecule.py --chain_length 25 --amine_spacing 5 --filename data
 #           -var output_amine 0 \
 #           -var output_amine_file "$LOGDIR/patch_locations_P${P}_scale${scale}.dat" \
 #           -var output_press 1 \
-#           -var output_press_file "$LOGDIR/press_${scale}_${P}.dat"
+#           -var output_press_file "$LOGDIR/press_${scale}_${P}_long.dat" \
+#           -var random_seed $((scale + 1))
 #   done
 # done
 
-for ((i = 0; i < 10; i++)); do
-        echo "Run number $((i + 1))"
-        #Single run
-        mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh \
-                -var N $N \
-                -var P $P \
-                -var BOX_SIZE $BOX_SIZE \
-                -var patch_bond_r0 $patch_bond_r0 \
-                -var patch_gauss_A_strength $patch_gauss_A_strength \
-                -var patch_gauss_B_width $patch_gauss_B_width \
-                -var output_traj $output_traj \
-                -var output_traj_file $output_traj_file \
-                -var output_msd $output_msd \
-                -var output_msd_file $output_msd_file \
-                -var output_amine $output_amine \
-                -var output_amine_file $output_amine_file \
-                -var output_press $output_press \
-                -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_${P}_${i}.dat" \
-                -var random_seed $i
-done
+# for ((i = 0; i < 10; i++)); do
+#         echo "Run number $((i + 1))"
+#         #Single run
+#         mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh \
+#                 -var N $N \
+#                 -var P $P \
+#                 -var BOX_SIZE $BOX_SIZE \
+#                 -var patch_bond_r0 $patch_bond_r0 \
+#                 -var patch_gauss_A_strength $patch_gauss_A_strength \
+#                 -var patch_gauss_B_width $patch_gauss_B_width \
+#                 -var output_traj $output_traj \
+#                 -var output_traj_file $output_traj_file \
+#                 -var output_msd $output_msd \
+#                 -var output_msd_file $output_msd_file \
+#                 -var output_amine $output_amine \
+#                 -var output_amine_file $output_amine_file \
+#                 -var output_press $output_press \
+#                 -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_${P}_${i}.dat" \
+#                 -var random_seed $i
+# done
+
+i=100
+
+# Single run
+mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh_short \
+        -var N $N \
+        -var P $P \
+        -var BOX_SIZE $BOX_SIZE \
+        -var patch_bond_r0 $patch_bond_r0 \
+        -var patch_gauss_A_strength $patch_gauss_A_strength \
+        -var patch_gauss_B_width $patch_gauss_B_width \
+        -var output_traj $output_traj \
+        -var output_traj_file $output_traj_file \
+        -var output_msd $output_msd \
+        -var output_msd_file $output_msd_file \
+        -var output_amine $output_amine \
+        -var output_amine_file $output_amine_file \
+        -var output_press $output_press \
+        -var output_press_file "$LOGDIR/press_test_freq_low_temp.dat" \
+        -var random_seed $i
+
+
+
 # for n in "${n_patch[@]}"; do
 #   echo "Generating molecule with $n amine patches."
 #   python3 generate_molecule_no_dummy.py --amine_spacing $n

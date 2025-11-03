@@ -20,11 +20,15 @@ def generate_molecule_file(filename='data/polymer.molecule',
     BOX_Z = 1.2 # padding (1.2)
 
 
+    
     if amine_spacing > chain_length:
-        raise ValueError("Amine spacing cannot be greater than chain length.")
-    amine_positions = list(range(amine_spacing, chain_length, amine_spacing))
-    if amine_positions[-1] == chain_length - 1:
-        print("Warning: Last monomer is an amine patch. This affects chain length.")
+        print("Warning: Amine spacing cannot be greater than chain length.")
+    if amine_spacing == 0:
+        amine_positions = []
+    else:
+        amine_positions = list(range(amine_spacing, chain_length, amine_spacing))
+        if amine_positions[-1] == chain_length - 1:
+            print("Warning: Last monomer is an amine patch. This affects chain length.")
 
     N = chain_length + len(amine_positions)  # total atoms
     
