@@ -25,7 +25,9 @@ log logs/log.amine_polymers
 # variable random_seed equal 12345
 
 # create simulation box
-region box block 0 9.178 0 9.178 0 9.178
+region box block 0 15.22 0 15.22 0 15.22
+
+compute all_atoms all count/type atom
 create_box 2 box bond/types 2 extra/bond/per/atom 4 extra/special/per/atom 20
 
 # polymer molecule definition
@@ -108,7 +110,9 @@ print "damping coefficient is $(200.0*dt)"
 
 # equilibration run
 thermo 100
+# dump eq all atom 100 logs/equilibration.lammpstrj
 run 500000
+# undump eq
 reset_timestep 0
 print "Equilibration done"
 
@@ -140,15 +144,47 @@ variable px_y equal c_thermo_press[1] - c_thermo_press[2]
 variable px_z equal c_thermo_press[1] - c_thermo_press[3]
 variable py_z equal c_thermo_press[2] - c_thermo_press[3]
 
-fix long_corr all ave/correlate/long 1 10000 &
+fix long_corr_1 all ave/correlate/long 1 10 &
           v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] &
           type auto & 
-          file "long_corr.dat" &
+          file logs/freq_10.dat &
           overwrite &
           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
-          ncorr 20 &
-          nlen 16 &
+          ncorr 30 &
+          nlen 8 &
           ncount 2
+
+# fix long_corr_2 all ave/correlate/long 1 100 &
+#           v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] &
+#           type auto & 
+#           file logs/freq_100.dat &
+#           overwrite &
+#           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
+#           ncorr 30 &
+#           nlen 8 &
+#           ncount 2
+
+
+# fix long_corr_4 all ave/correlate/long 1 1000 &
+#           v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] &
+#           type auto & 
+#           file logs/freq_1000.dat &
+#           overwrite &
+#           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
+#           ncorr 30 &
+#           nlen 8 &
+#           ncount 2
+
+
+# fix long_corr_8 all ave/correlate/long 1 1000000 &
+#           v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] &
+#           type auto & 
+#           file logs/freq_1000000.dat &
+#           overwrite &
+#           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
+#           ncorr 30 &
+#           nlen 8 &
+#           ncount 2
 
 # experiment run
 timestep 0.001 
@@ -156,5 +192,7 @@ thermo_style custom step temp epair emol etotal press pxy
 thermo 100
 run 120000000
 
+variable density equal ${c_all_atoms} / (15.22*15.22*15.22)
+print "Final density is ${density}"
 
 print "Ending in.amine_polymers"

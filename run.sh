@@ -80,8 +80,7 @@ python3 generate_molecule.py --chain_length 100 --amine_spacing 1 --filename dat
 echo "Generate short polymer molecule file."
 python3 generate_molecule.py --chain_length 28 --amine_spacing 1 --filename data/polymer_short.molecule
 
-echo "Generate... other... polymer molecule file."
-python3 generate_molecule.py --chain_length 10 --amine_spacing 0 --filename data/polymer.molecule
+
 
 # for scale in "${patch_A_strengths[@]}"; do
 #   for P in "${P_values[@]}"; do
@@ -107,12 +106,59 @@ python3 generate_molecule.py --chain_length 10 --amine_spacing 0 --filename data
 #   done
 # done
 
-# for ((i = 0; i < 10; i++)); do
-#         echo "Run number $((i + 1))"
-#         #Single run
-#         mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh \
+i=(1 2 3 5 10 15 20 30)
+
+for i in "${i[@]}"; do
+        echo "Run number $((i + 1))"
+
+        echo "Generate... other... polymer molecule file."
+        python3 generate_molecule.py --chain_length 30 --amine_spacing $i --filename data/polymer.molecule
+        #Single run
+        mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh \
+                -var N $N \
+                -var P $P \
+                -var BOX_SIZE $BOX_SIZE \
+                -var patch_bond_r0 $patch_bond_r0 \
+                -var patch_gauss_A_strength $patch_gauss_A_strength \
+                -var patch_gauss_B_width $patch_gauss_B_width \
+                -var output_traj $output_traj \
+                -var output_traj_file $output_traj_file \
+                -var output_msd $output_msd \
+                -var output_msd_file $output_msd_file \
+                -var output_amine $output_amine \
+                -var output_amine_file $output_amine_file \
+                -var output_press $output_press \
+                -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_${P}_${i}.dat" \
+                -var random_seed $i
+done
+
+# i=100
+
+# Single run
+# mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh_short \
+#         -var N $N \
+#         -var P $P \
+#         -var BOX_SIZE $BOX_SIZE \
+#         -var patch_bond_r0 $patch_bond_r0 \
+#         -var patch_gauss_A_strength $patch_gauss_A_strength \
+#         -var patch_gauss_B_width $patch_gauss_B_width \
+#         -var output_traj $output_traj \
+#         -var output_traj_file $output_traj_file \
+#         -var output_msd $output_msd \
+#         -var output_msd_file $output_msd_file \
+#         -var output_amine $output_amine \
+#         -var output_amine_file $output_amine_file \
+#         -var output_press $output_press \
+#         -var output_press_file "$LOGDIR/press_test_freq_low_temp.dat" \
+#         -var random_seed $i
+
+# n_len_values=(2 4 8 16 64)
+
+# for n_len in "${n_len_values[@]}"; do
+#         mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh_short \
 #                 -var N $N \
 #                 -var P $P \
+#                 -var n_len $n_len \
 #                 -var BOX_SIZE $BOX_SIZE \
 #                 -var patch_bond_r0 $patch_bond_r0 \
 #                 -var patch_gauss_A_strength $patch_gauss_A_strength \
@@ -123,30 +169,10 @@ python3 generate_molecule.py --chain_length 10 --amine_spacing 0 --filename data
 #                 -var output_msd_file $output_msd_file \
 #                 -var output_amine $output_amine \
 #                 -var output_amine_file $output_amine_file \
-#                 -var output_press $output_press \
-#                 -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_${P}_${i}.dat" \
+#                 -var output_press 0 \
+#                 -var output_press_file "$LOGDIR/n_len_${n_len}.dat" \
 #                 -var random_seed $i
 # done
-
-i=100
-
-# Single run
-mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh_short \
-        -var N $N \
-        -var P $P \
-        -var BOX_SIZE $BOX_SIZE \
-        -var patch_bond_r0 $patch_bond_r0 \
-        -var patch_gauss_A_strength $patch_gauss_A_strength \
-        -var patch_gauss_B_width $patch_gauss_B_width \
-        -var output_traj $output_traj \
-        -var output_traj_file $output_traj_file \
-        -var output_msd $output_msd \
-        -var output_msd_file $output_msd_file \
-        -var output_amine $output_amine \
-        -var output_amine_file $output_amine_file \
-        -var output_press $output_press \
-        -var output_press_file "$LOGDIR/press_test_freq_low_temp.dat" \
-        -var random_seed $i
 
 
 
