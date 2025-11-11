@@ -56,7 +56,7 @@ N=30 # total number of polymers
 P=0 # number of long polymers
 BOX_SIZE=7.06
 patch_bond_r0=0.45
-patch_gauss_A_strength=0
+patch_gauss_A_strength=50
 patch_gauss_B_width=13.8504255125
 
 output_traj=0
@@ -65,7 +65,7 @@ output_msd=0
 output_msd_file="$LOGDIR/patch_msd.dat"
 output_amine=0
 output_amine_file="$LOGDIR/patch_locations.dat"
-output_press=1
+output_press=0
 output_press_file="$LOGDIR/press_${patch_gauss_A_strength}_${P}.dat"
 
 # P_values=(0 50 100 150 200 250 300)
@@ -106,30 +106,34 @@ python3 generate_molecule.py --chain_length 28 --amine_spacing 1 --filename data
 #   done
 # done
 
-i=(1 2 3 5 10 15 20 30)
+spacing=(1 2 3 5 10 15 20 29)
+seeds=(100 200 300 400 500)
+# spacing=(3)
 
-for i in "${i[@]}"; do
-        echo "Run number $((i + 1))"
+for j in "${seeds[@]}"; do
+        for i in "${spacing[@]}"; do
+                echo "Run spacing $i with seed $j"
 
-        echo "Generate... other... polymer molecule file."
-        python3 generate_molecule.py --chain_length 30 --amine_spacing $i --filename data/polymer.molecule
-        #Single run
-        mpirun -np 12 --oversubscribe $LAMMPS -in in.amine_polymers_sh \
-                -var N $N \
-                -var P $P \
-                -var BOX_SIZE $BOX_SIZE \
-                -var patch_bond_r0 $patch_bond_r0 \
-                -var patch_gauss_A_strength $patch_gauss_A_strength \
-                -var patch_gauss_B_width $patch_gauss_B_width \
-                -var output_traj $output_traj \
-                -var output_traj_file $output_traj_file \
-                -var output_msd $output_msd \
-                -var output_msd_file $output_msd_file \
-                -var output_amine $output_amine \
-                -var output_amine_file $output_amine_file \
-                -var output_press $output_press \
-                -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_${P}_${i}.dat" \
-                -var random_seed $i
+                echo "Generate... other... polymer molecule file."
+                python3 generate_molecule.py --chain_length 30 --amine_spacing $i --filename data/polymer.molecule
+                #Single run
+                mpirun -np 13 --oversubscribe $LAMMPS -in in.amine_polymers_sh_short \
+                        -var N $N \
+                        -var P $P \
+                        -var BOX_SIZE $BOX_SIZE \
+                        -var patch_bond_r0 $patch_bond_r0 \
+                        -var patch_gauss_A_strength $patch_gauss_A_strength \
+                        -var patch_gauss_B_width $patch_gauss_B_width \
+                        -var output_traj $output_traj \
+                        -var output_traj_file $output_traj_file \
+                        -var output_msd $output_msd \
+                        -var output_msd_file $output_msd_file \
+                        -var output_amine $output_amine \
+                        -var output_amine_file $output_amine_file \
+                        -var output_press $output_press \
+                        -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_spacing${i}_seed${j}.dat" \
+                        -var random_seed $j
+        done
 done
 
 # i=100
