@@ -161,7 +161,7 @@ fix long_corr all ave/correlate/long 1 100000 &
           file ${output_press_file} &
           overwrite &
           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
-          ncorr 40 &
+          ncorr 70 &
           nlen 16 &
           ncount 2
 
@@ -169,13 +169,16 @@ fix long_corr all ave/correlate/long 1 100000 &
 timestep 0.001 # TODO: uncomment this
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
-run 120000000
+if "${random_seed} == 100" then &
+    "run 120000000" &
+else &
+    "run 12000000"
 
 # compute all_atoms all count/type atom
 variable natoms equal atoms
 print "Total number of atoms is ${natoms}"
 
-variable density equal ${natoms} / (15.22 * 15.22 * 15.22)
+variable density equal ${natoms} / (30 * 30 * 30)
 print "Final density is ${density}"
 
 print "Ending in.amine_polymers_sh_short"
