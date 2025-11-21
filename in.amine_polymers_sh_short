@@ -110,10 +110,9 @@ print "damping coefficient is $(200.0*dt)"
 
 # equilibration run
 thermo 100
-# dump eq all atom 100 logs/equilibration.lammpstrj
-# TODO: uncomment below
+dump eq all atom 100 data/equilibration.lammpstrj
 run 5000000
-# undump eq
+undump eq
 reset_timestep 0
 print "Equilibration done"
 
@@ -129,7 +128,7 @@ if "${output_msd} == 1" then &
 # save amine positions for bond analysis (optional)
 if "${output_amine} == 1" then &
     "print 'Saving amine positions to ${output_amine_file}'" &
-    "dump aminepos amine custom 10 ${output_amine_file} id type x y z"
+    "dump aminepos amine custom 1000 ${output_amine_file} id type x y z"
 
 # save trajectory of all particles (optional)
 if "${output_traj} == 1" then &
@@ -155,12 +154,17 @@ variable re2 equal v_dxx*v_dxx + v_dyy*v_dyy + v_dzz*v_dzz
 variable re equal sqrt(v_re2)
 fix endtoend all ave/time 100 100 10000 v_re file logs/endtoend_short.dat
 
+# compute all_atoms all count/type atom
+variable natoms equal atoms
+print "Total number of atoms is ${natoms}"
+
 fix long_corr all ave/correlate/long 1 100000 &
           v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] &
           type auto & 
           file ${output_press_file} &
           overwrite &
           title1 "# v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" & 
+          title2 "# total number of atoms: ${natoms}" &
           ncorr 70 &
           nlen 16 &
           ncount 2
@@ -170,13 +174,11 @@ timestep 0.001 # TODO: uncomment this
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
 if "${random_seed} == 100" then &
-    "run 120000000" &
+    "run 12000000" & 
 else &
     "run 12000000"
 
-# compute all_atoms all count/type atom
-variable natoms equal atoms
-print "Total number of atoms is ${natoms}"
+
 
 variable density equal ${natoms} / (30 * 30 * 30)
 print "Final density is ${density}"
