@@ -1,18 +1,32 @@
 #!/bin/bash
 #SBATCH --job-name=patchy_polymer
 #SBATCH --nodes=1
-#SBATCH --account=st-jrottler-1
-#SBATCH --output=logs/patchy_polymer_%A_%a.out
-#SBATCH --error=logs/patchy_polymer_%A_%a.err
-#SBATCH --ntasks=10
-#SBATCH --time=02:00:00
+#SBATCH --ntasks=16
 #SBATCH --partition=skylake
+#SBATCH --account=st-jrottler-1
+#SBATCH --time=02:00:00
+#SBATCH --output=logs/patchy_polymer_%A.out
+#SBATCH --error=logs/patchy_polymer_%A.err
+
+echo "Job started on $(hostname) at $(date)"
 
 # =============================
-# Paths and LAMMPS executable
+# Environment
 # =============================
-LAMMPS=../lammps_build/lammps/build/lmp # Path to LAMMPS executable on HPC
-INPUT_SHORT=in.amine_polymers_sh_short
+module purge
+module load gcc
+module load openmpi
+module load python
+
+cd "$SLURM_SUBMIT_DIR"
+
+export OMP_NUM_THREADS=1
+
+# =============================
+# Paths
+# =============================
+LAMMPS=../lammps_build/lammps/build/lmp
+INPUT=in.amine_polymers_sh_short
 LOGDIR=logs
 DATADIR=data
 
@@ -26,54 +40,70 @@ patch_gauss_A_strength=50
 patch_gauss_B_width=13.8504255125
 
 output_traj=0
-output_traj_file="$DATADIR/patch_trajectory.lammpstrj"
+output_traj_file="${DATADIR}/patch_trajectory.lammpstrj"
+
 output_msd=0
-output_msd_file="$LOGDIR/patch_msd.dat"
+output_msd_file="${LOGDIR}/patch_msd.dat"
+
 output_amine=1
-output_amine_file="$LOGDIR/patch_locations.dat"
+output_amine_file="${LOGDIR}/patch_locations.dat"
+
 output_press=0
 
 # =============================
-# Generate molecules
+# Molecule generation
 # =============================
-echo "Generate long polymer molecule file."
-python3 generate_molecule.py --chain_length 100 --amine_spacing 1 \
-    --filename "$DATADIR/polymer_long.molecule"
+echo "Generating long polymer molecule..."
+python3 generate_molecule.py \
+    --chain_length 100 \
+    --amine_spacing 1 \
+    --filename "${DATADIR}/polymer_long.molecule"
 
-echo "Generate short polymer molecule file."
-python3 generate_molecule.py --chain_length 28 --amine_spacing 1 \
-    --filename "$DATADIR/polymer_short.molecule"
+echo "Generating short polymer molecule..."
+python3 generate_molecule.py \
+    --chain_length 28 \
+    --amine_spacing 1 \
+    --filename "${DATADIR}/polymer_short.molecule"
 
 # =============================
-# Define spacings and seeds
+# Parameter sweep
 # =============================
 spacing=(15)
 seeds=(100)
 
 # =============================
-# Main loop: generate polymer and run LAMMPS
+# Main loop
 # =============================
-for j in "${seeds[@]}"; do
-    for i in "${spacing[@]}"; do
-        echo "Run spacing $i with seed $j"
+for seed in "${seeds[@]}"; do
+    for sp in "${spacing[@]}"; do
 
-        echo "Generate polymer molecule file for spacing $i."
-        python3 generate_molecule.py --chain_length 30 --amine_spacing "$i" \
-            --filename "$DATADIR/polymer.molecule"
+        echo "--------------------------------------"
+        echo "Spacing = ${sp}, Seed = ${seed}"
+        echo "--------------------------------------"
 
-        # Run LAMMPS using srun (Slurm-managed parallel execution)
-        srun $LAMMPS -in "$INPUT_SHORT" \
-            -var patch_bond_r0 "$patch_bond_r0" \
-            -var patch_gauss_A_strength "$patch_gauss_A_strength" \
-            -var patch_gauss_B_width "$patch_gauss_B_width" \
-            -var output_traj "$output_traj" \
-            -var output_traj_file "$output_traj_file" \
-            -var output_msd "$output_msd" \
-            -var output_msd_file "$output_msd_file" \
-            -var output_amine "$output_amine" \
-            -var output_amine_file "$output_amine_file" \
-            -var output_press "$output_press" \
-            -var output_press_file "$LOGDIR/press_${patch_gauss_A_strength}_spacing${i}_seed${j}.dat" \
-            -var random_seed "$j"
+        echo "Generating polymer molecule (spacing=${sp})..."
+        python3 generate_molecule.py \
+            --chain_length 30 \
+            --amine_spacing "${sp}" \
+            --filename "${DATADIR}/polymer.molecule"
+
+        echo "Running LAMMPS with mpirun..."
+        mpirun -np ${SLURM_NTASKS} --oversubscribe \
+            ${LAMMPS} -in "${INPUT}" \
+            -var patch_bond_r0 "${patch_bond_r0}" \
+            -var patch_gauss_A_strength "${patch_gauss_A_strength}" \
+            -var patch_gauss_B_width "${patch_gauss_B_width}" \
+            -var output_traj "${output_traj}" \
+            -var output_traj_file "${output_traj_file}" \
+            -var output_msd "${output_msd}" \
+            -var output_msd_file "${output_msd_file}" \
+            -var output_amine "${output_amine}" \
+            -var output_amine_file "${output_amine_file}" \
+            -var output_press "${output_press}" \
+            -var output_press_file "${LOGDIR}/press_A${patch_gauss_A_strength}_spacing${sp}_seed${seed}.dat" \
+            -var random_seed "${seed}"
+
     done
 done
+
+echo "Job finished at $(date)"

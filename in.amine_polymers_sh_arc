@@ -170,7 +170,7 @@ timestep 0.005
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
 if "${random_seed} == 100" then &
-    "run 12000000" & 
+    "run 120000" & 
 else &
     "run 120000000"
 
