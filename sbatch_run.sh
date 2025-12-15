@@ -7,6 +7,9 @@
 #SBATCH --time=02:00:00
 #SBATCH --output=logs/patchy_polymer_%A.out
 #SBATCH --error=logs/patchy_polymer_%A.err
+#SBATCH --mem=16G
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=azhu13@student.ubc.ca
 
 echo "Job started on $(hostname) at $(date)"
 
