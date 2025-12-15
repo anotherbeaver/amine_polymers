@@ -15,6 +15,7 @@ log logs/log.amine_polymers
 # variable output_amine_file string logs/patch_n_${patch_gauss_A_strength}_${patch_bond_r0}.dat
 
 
+
 # variable output_traj equal 0
 # variable output_traj_file equal "logs/dump.lammpstrj"
 # variable output_msd equal 0
