@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --account=st-jrottler-1
 #SBATCH --ntasks=16
-#SBATCH --time=02:00:00
+#SBATCH --time=15:00:00         # max walltime hh:mm:ss
 #SBATCH --output=logs/patchy_polymer_%A.out
 #SBATCH --error=logs/patchy_polymer_%A.err
 #SBATCH --mem=16G
@@ -72,8 +72,8 @@ python3 generate_molecule.py \
 # =============================
 # Parameter sweep
 # =============================
-spacing=(15)
-seeds=(100)
+spacing=(0 2)
+seeds=(1000)
 
 # =============================
 # Main loop
