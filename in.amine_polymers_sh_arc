@@ -69,7 +69,7 @@ pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
 # create atoms
-print "N = ${N}  N_beads = ${N_beads}  N_chains = ${N_chains} random_seed = ${random_seed}"
+print "N_beads = ${N_beads}  N_chains = ${N_chains} random_seed = ${random_seed}"
 create_atoms 0 random ${N_chains} 12345 box mol polymer_short ${random_seed}
 
 # group definitions
