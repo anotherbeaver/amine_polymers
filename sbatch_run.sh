@@ -10,7 +10,7 @@
 # =============================
 # Paths and LAMMPS executable
 # =============================
-LAMMPS=../lammps/build/lmp
+LAMMPS=../lammps_build/lammps/build/lmp # Path to LAMMPS executable on HPC
 INPUT_SHORT=in.amine_polymers_sh_short
 LOGDIR=logs
 DATADIR=data
