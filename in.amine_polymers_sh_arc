@@ -101,7 +101,7 @@ pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
 # initial velocities for equilibration
-timestep 0.001 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
+timestep 0.005 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
 velocity all create 1.0 1 # initial temperature 1.0, random seed 1
 fix 1 all nvt temp 1.0 1.0 $(200.0*dt) # NVT ensemble, temp 1.0, damping parameter $(200.0*dt)
 print "damping coefficient is $(200.0*dt)"
@@ -166,7 +166,7 @@ fix long_corr all ave/correlate/long 1 100000 &
           ncount 2
 
 # experiment run 
-timestep 0.001
+timestep 0.005
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
 if "${random_seed} == 100" then &
