@@ -3,7 +3,6 @@
 #SBATCH --output=logs/patchy_polymer_%A_%a.out
 #SBATCH --error=logs/patchy_polymer_%A_%a.err
 #SBATCH --nodes=1
-#SBATCH --mem=10G
 #SBATCH --account=st-jrottler-1
 #SBATCH --ntasks=16
 #SBATCH --time=02:00:00
