@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=patchy_polymer
 #SBATCH --nodes=1
+#SBATCH --account=st-jrottler-1
 #SBATCH --output=logs/patchy_polymer_%A_%a.out
 #SBATCH --error=logs/patchy_polymer_%A_%a.err
 #SBATCH --ntasks=10
