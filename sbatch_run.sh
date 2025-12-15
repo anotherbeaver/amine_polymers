@@ -30,7 +30,7 @@ export OMP_NUM_THREADS=1
 # Paths
 # =============================
 LAMMPS=../lammps_build/lammps/build/lmp
-INPUT=in.amine_polymers_sh_short
+INPUT=in.amine_polymers_sh_arc
 LOGDIR=logs
 DATADIR=data
 
