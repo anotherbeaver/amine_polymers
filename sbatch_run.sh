@@ -1,10 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=polymer
-#SBATCH --output=logs/polymer_%A_%a.out
-#SBATCH --error=logs/polymer_%A_%a.err
-#SBATCH --ntasks=13
+#SBATCH --job-name=patchy_polymer
+#SBATCH --nodes=1
+#SBATCH --output=logs/patchy_polymer_%A_%a.out
+#SBATCH --error=logs/patchy_polymer_%A_%a.err
+#SBATCH --ntasks=10
 #SBATCH --time=02:00:00
-#SBATCH --partition=standard
+#SBATCH --partition=skylake
 
 # =============================
 # Paths and LAMMPS executable
