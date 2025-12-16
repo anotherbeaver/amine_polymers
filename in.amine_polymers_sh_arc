@@ -173,7 +173,7 @@ thermo 100
 if "${random_seed} == 100" then &
     "run 120000" & 
 else &
-    "run 120000000"
+    "run 24000000"
 
 
 variable density equal ${natoms} / (30 * 30 * 30)
