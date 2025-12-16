@@ -1,3 +1,4 @@
+# original location: <PROJECT_ROOT>/potential/generate_exponential.py
 """
 Generate an exponential potential file for LAMMPS.
 

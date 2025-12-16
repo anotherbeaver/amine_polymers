@@ -1,3 +1,4 @@
+# original location: <PROJECT_ROOT>/in.amine_polymers_sh
 # mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.amine_polymers_sh
 print "Starting in.amine_polymers"
 

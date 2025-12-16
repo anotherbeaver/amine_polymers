@@ -1,12 +1,12 @@
 # amine_polymers
-Sketching and simulating generic polymer chains with functional "amines" as sites for reversible dynamic crosslinking.
+Sketching and simulating generic polymer chains with functional "amines" as sites for reversible dynamic crosslinking. 
 
 # Running Polymer Simulation
 
 Broadly, a molecule is defined and provided to the 
 
 ## LAMMPS input script
-Calling input script requires defining the following variables:
+Calling the input script requires defining the following variables:
 
 | Variable               | Description                                           |
 |------------------------|-------------------------------------------------------|

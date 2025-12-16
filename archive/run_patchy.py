@@ -1,3 +1,7 @@
+# original location: <PROJECT_ROOT>/run_patchy.py
+# trying out the python implementation of LAMMPS, same problem with calling python from lammps -- only 
+# way to add/destroy bonds is to stop the simulation and restart it, which is slow
+
 import numpy as np
 import random
 import os
@@ -19,22 +23,16 @@ BOND_TYPE = 2               # harmonic patch bond type
 BREAK_PROB = 0.1            # probability to break a bond
 BONDS_FILE = "data/current_bonds.npy"  # optional persistence
 
-# --------------------------
 # Initialize bonded pairs
-# --------------------------
 if os.path.exists(BONDS_FILE):
     bonded_pairs = set(map(tuple, np.load(BONDS_FILE)))
 else:
     bonded_pairs = set()
 
-# --------------------------
 # Initialize LAMMPS
-# --------------------------
 lmp = lammps()
 
-# --------------------------
 # LAMMPS commands
-# --------------------------
 lmp.command("units lj")
 lmp.command("dimension 3")
 lmp.command("boundary p p p")

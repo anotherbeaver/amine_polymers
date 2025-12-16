@@ -1,3 +1,5 @@
+# intended for running on ARC Sockeye HPC
+
 # mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.amine_polymers_sh
 print "Starting in.amine_polymers"
 
