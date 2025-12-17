@@ -1,5 +1,5 @@
 # mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.amine_polymers_sh
-print "Starting in.amine_polymers"
+print "Starting in.amine_polymers_sh_arc"
 
 # simulation format parameters
 units lj    #  Lennard-Jones units, essentially unitless

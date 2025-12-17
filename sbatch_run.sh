@@ -6,7 +6,10 @@
 #SBATCH --time=15:00:00
 #SBATCH --mem=16G
 #SBATCH --partition=skylake
+# ============================
+# NOTE: Adjust the array range according to the total number of parameter combinations
 #SBATCH --array=0-0
+# ============================
 #SBATCH --output=logs/patchy_polymer_%A_%a.out
 #SBATCH --error=logs/patchy_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
