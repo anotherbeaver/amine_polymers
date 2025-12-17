@@ -1,3 +1,7 @@
+# Original location: <PROJECT_ROOT>/check_potential.py
+# OLD OLD code to plot and check summed potentials, from the
+# very beginning of the term
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d

@@ -1,3 +1,4 @@
+# Original location: <PROJECT_ROOT>/in.no_dummy
 # mpirun -np 6 ../lammps/build/lmp -in in.amine_polymers
 
 print "Starting in.amine_polymers"

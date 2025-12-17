@@ -1,3 +1,6 @@
+# Original location: <PROJECT_ROOT>/generate_data.py
+# Very old, originally used to create locations of boxes before
+# molecule files were used
 """
 Generate data file for LAMMPS simulation
 

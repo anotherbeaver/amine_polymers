@@ -1,3 +1,7 @@
+# Original location : <PROJECT_ROOT>/generate_molecule_dummy.py
+# Old file that generates molecule with a dummy between the backbone and
+# patch, which is identical to the backbone beads. Not the way we actaully
+# want to do it, but kept for reference.
 """
 Similar to generate_data.py but generates a .molecule file, which should be easier to use to generate random configs
 

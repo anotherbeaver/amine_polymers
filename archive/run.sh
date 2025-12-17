@@ -1,5 +1,7 @@
 #!/bin/bash
-
+# Original location: <PROJECT_ROOT>/run.sh
+# Old LAMMPS script for running on the box upstairs -- lots of 
+# legacy and leftover stuff in here, but might be good to read.
 : '
 Calling input script requires defining the following variables:
 - N: number of polymers

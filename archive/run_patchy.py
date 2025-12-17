@@ -1,3 +1,5 @@
+# Original location: <PROJECT_ROOT>/run_patchy.py
+# Script to try running purely with python with MDMC approach
 import numpy as np
 import random
 import os
