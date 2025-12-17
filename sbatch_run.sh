@@ -6,7 +6,7 @@
 #SBATCH --time=15:00:00
 #SBATCH --mem=16G
 #SBATCH --partition=skylake
-#SBATCH --array=0-1
+#SBATCH --array=0-0
 #SBATCH --output=logs/patchy_polymer_%A_%a.out
 #SBATCH --error=logs/patchy_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -42,9 +42,13 @@ patch_bond_r0=0.45
 patch_gauss_A_strength=50
 patch_gauss_B_width=13.8504255125
 output_traj=0
+output_traj_file="$DATADIR/patch_trajectory.lammpstrj"
 output_msd=0
+output_msd_file="$LOGDIR/patch_msd.dat"
 output_amine=1
+output_amine_file="$LOGDIR/patch_locations.dat"
 output_press=0
+# output_press_file="$LOGDIR/press_${patch_gauss_A_strength}_${spacing}.dat"
 
 # =============================
 # Parameter space
@@ -81,8 +85,11 @@ srun ${LAMMPS} -in "${INPUT}" \
     -var patch_gauss_A_strength "${patch_gauss_A_strength}" \
     -var patch_gauss_B_width "${patch_gauss_B_width}" \
     -var output_traj "${output_traj}" \
+    -var output_traj_file "${output_traj_file}" \
     -var output_msd "${output_msd}" \
+    -var output_msd_file "${output_msd_file}" \
     -var output_amine "${output_amine}" \
+    -var output_amine_file "${output_amine_file}" \
     -var output_press "${output_press}" \
     -var output_press_file "${LOGDIR}/press_A${patch_gauss_A_strength}_spacing${sp}_seed${seed}.dat" \
     -var random_seed "${seed}"
