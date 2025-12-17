@@ -4,7 +4,7 @@
 #SBATCH --error=logs/patchy_polymer_%A_%a.err
 #SBATCH --nodes=1
 #SBATCH --account=st-jrottler-1
-#SBATCH --ntasks=16
+#SBATCH --ntasks=32
 #SBATCH --time=15:00:00         # max walltime hh:mm:ss
 #SBATCH --output=logs/patchy_polymer_%A.out
 #SBATCH --error=logs/patchy_polymer_%A.err
@@ -53,21 +53,7 @@ output_amine=1
 output_amine_file="${LOGDIR}/patch_locations.dat"
 
 output_press=0
-
-# =============================
-# Molecule generation
-# =============================
-echo "Generating long polymer molecule..."
-python3 generate_molecule.py \
-    --chain_length 100 \
-    --amine_spacing 1 \
-    --filename "${DATADIR}/polymer_long.molecule"
-
-echo "Generating short polymer molecule..."
-python3 generate_molecule.py \
-    --chain_length 28 \
-    --amine_spacing 1 \
-    --filename "${DATADIR}/polymer_short.molecule"
+# output_press_file="${LOGDIR}/patch_pressure.dat"
 
 # =============================
 # Parameter sweep
