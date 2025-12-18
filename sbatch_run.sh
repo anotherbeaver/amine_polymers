@@ -37,11 +37,22 @@ mkdir -p "$LOGDIR" "$DATADIR"
 # -----------------------------
 # Fixed parameters
 # -----------------------------
+N=30 # total number of polymers
+P=0 # number of long polymers
+BOX_SIZE=7.06
 patch_bond_r0=0.45
+patch_gauss_A_strength=50
+patch_gauss_B_width=13.8504255125
+
 output_traj=0
+output_traj_file="$DATADIR/patch_trajectory.lammpstrj"
 output_msd=0
-output_amine=1
-output_press=0
+output_msd_file="$LOGDIR/patch_msd.dat"
+output_amine=0
+output_amine_file="$LOGDIR/patch_locations.dat"
+output_press=1
+# output_press_file="$LOGDIR/press_${patch_gauss_A_strength}_${P}.dat"
+
 
 # -----------------------------
 # Parameter space
@@ -68,9 +79,6 @@ seed=${seeds[$seed_index]}
 sp=${spacing[$spacing_index]}
 patch_gauss_A_strength=${A_strengths[$A_index]}
 
-# Keep B width fixed or add another array if needed
-patch_gauss_B_width=13.8504255125
-
 echo "Running spacing=${sp}, seed=${seed}, A_strength=${patch_gauss_A_strength}"
 
 # -----------------------------
@@ -92,7 +100,7 @@ srun ${LAMMPS} -in "${INPUT}" \
     -var output_msd "${output_msd}" \
     -var output_amine "${output_amine}" \
     -var output_press "${output_press}" \
-    -var output_press_file "${LOGDIR}/press_A${patch_gauss_A_strength}_spacing${sp}_seed${seed}.dat" \
+    -var output_press_file "${LOGDIR}/press_${patch_gauss_A_strength}_spacing${sp}_seed${seed}.dat" \
     -var random_seed "${seed}"
 
 echo "Finished at $(date)"
