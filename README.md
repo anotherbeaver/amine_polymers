@@ -118,7 +118,9 @@ A deceivingly named file, this locates and counts the number of neighbours invol
 The output is formatted as a csv with timestep and center (atom id) columns. There are 10 additional columns of atom ids and x, y, z, which allow up to 10 neighbours to be tracked. This is meant to be quite sparse, as we don't generally have much more than 3 neighbours, and those should also be rare. There may be unexpected behaviour if more than 10 neighbours are found. 
 
 ## $G(t)$ postprocessing
-Although calculating $G(t)$ with stress autocorrelation is a possibility (see in `\archive\`), the best method is [on-the-fly multiple-tau autocorrelation](https://doi.org/10.1063/1.3491098), which is built-in to LAMMPS. 
+Although calculating $G(t)$ with stress autocorrelation is a possibility (see in `\archive\`), the best method is [on-the-fly multiple-tau autocorrelation](https://doi.org/10.1063/1.3491098), which is built-in to LAMMPS. This has been used extensively in papers on related simulations, which are worth checking out for some intuition on simulation conditions and length. 
+
+The first part of the $G(t)$ graph is the result of 
 
 # State of the project
 Date added: 17. December 2025
@@ -130,11 +132,14 @@ Note that most literature about similar simulations uses $\rho=0.85$, a lower de
 Here's some relevant reading for now:
 
 - [Relaxation Dynamics of Entangled Linear Polymer Melts via Molecular Dynamics Simulations (Alireza F. Behbahani & Friederike Schmid)](https://doi.org/10.1021/acs.macromol.4c02168)
+   - Follows very closely the process that we do, though addresses chain length and does not have any connection to reversible cross-linking. Very good to read through to understand the simulation + postprocessing pipeline. 
 -  [Stress relaxation in tunable gels (Raffaelli, C., & Ellenbroek, W. G.)](https://doi.org/10.1039/D1SM00091H)
    - This is where we found the Gaussian potential method originally. Note the paper erroneously writes it as an exponential.
 - [Three-body potential for simulating bond swaps in molecular dynamics (Sciortino, F.)](https://doi.org/10.1140/epje/i2017-11496-5)
    - Another method explored, using a three body potential that prevents valency violation. The lack of bonding energy and possible repulsion in the three body case was not good though.
+- [Equilibrium and non-equilibrium molecular dynamics approaches for the linear viscoelasticity of polymer melts (Adeyemi, O., Zhu, S., Xi, L.)](https://doi.org/10.1063/5.0090540)
+   - Details how $G(t), G'(T), G''(t)$ are retrived with equilibrium molecular dynamics as is done in this project. Discusses the difference and equivalence with non-equilibrium methods.
 
-On the software side, quite a few data files that were run through Jupyter notebooks over the last few months are not around anymore -- either they can be regenerated or at this stage are no longer needed, if they were addressing old problems.
+On the software side, quite a few data files that were evaluated through Jupyter notebooks over the last few months are not around anymore -- either they can be regenerated or at this stage are no longer needed, if they were addressing old problems. As such, the state of most of the notebooks is left as is, and are not intended to be run again.
 
 ## What's next?
