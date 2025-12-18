@@ -135,4 +135,6 @@ Here's some relevant reading for now:
 - [Three-body potential for simulating bond swaps in molecular dynamics (Sciortino, F.)](https://doi.org/10.1140/epje/i2017-11496-5)
    - Another method explored, using a three body potential that prevents valency violation. The lack of bonding energy and possible repulsion in the three body case was not good though.
 
+On the software side, quite a few data files that were run through Jupyter notebooks over the last few months are not around anymore -- either they can be regenerated or at this stage are no longer needed, if they were addressing old problems.
+
 ## What's next?
