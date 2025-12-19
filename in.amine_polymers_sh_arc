@@ -41,8 +41,7 @@ create_box 2 box bond/types 2 extra/bond/per/atom 4 extra/special/per/atom 20
 # polymer molecule definition
 mass 1 1.0 # backbone + dummy mass
 mass 2 1.0 # patch mass
-molecule polymer_short data/polymer.molecule    # TODO: currently short is wrong, only for testing
-molecule polymer_long data/polymer_long.molecule
+molecule polymer ${molecule_file}
 
 # bond potentials (harmonic)
 # bond_style fene
@@ -70,7 +69,7 @@ pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaus
 
 # create atoms
 print "N_beads = ${N_beads}  N_chains = ${N_chains} random_seed = ${random_seed}"
-create_atoms 0 random ${N_chains} 12345 box mol polymer_short ${random_seed}
+create_atoms 0 random ${N_chains} 12345 box mol polymer ${random_seed}
 
 # group definitions
 group monomer type 1

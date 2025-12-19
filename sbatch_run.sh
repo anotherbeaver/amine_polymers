@@ -87,7 +87,7 @@ echo "Running spacing=${sp}, seed=${seed}, A_strength=${patch_gauss_A_strength}"
 python3 generate_molecule.py \
     --chain_length 30 \
     --amine_spacing "${sp}" \
-    --filename "${DATADIR}/polymer.molecule"
+    --filename "${DATADIR}/polymer_${seed}_${sp}_${patch_gauss_A_strength}.molecule"
 
 # -----------------------------
 # Run LAMMPS
@@ -101,6 +101,7 @@ srun ${LAMMPS} -in "${INPUT}" \
     -var output_amine "${output_amine}" \
     -var output_press "${output_press}" \
     -var output_press_file "${LOGDIR}/press_${patch_gauss_A_strength}_spacing${sp}_seed${seed}.dat" \
+    -var molecule_file "${DATADIR}/polymer_${seed}_${sp}_${patch_gauss_A_strength}.molecule" \
     -var random_seed "${seed}"
 
 echo "Finished at $(date)"
