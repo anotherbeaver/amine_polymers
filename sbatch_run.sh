@@ -50,7 +50,7 @@ output_msd=0
 output_msd_file="$LOGDIR/patch_msd.dat"
 output_amine=0
 output_amine_file="$LOGDIR/patch_locations.dat"
-output_press=1
+output_press=0
 # output_press_file="$LOGDIR/press_${patch_gauss_A_strength}_${P}.dat"
 
 
