@@ -2,8 +2,8 @@
 #SBATCH --job-name=patchy_polymer
 #SBATCH --account=st-jrottler-1
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
-#SBATCH --time=15:00:00
+#SBATCH --ntasks=32
+#SBATCH --time=25:00:00
 #SBATCH --mem=16G
 #SBATCH --partition=skylake
 #SBATCH --array=0-5              # total combinations = spacing * seeds * A_strengths
