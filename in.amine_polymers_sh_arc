@@ -27,7 +27,7 @@ log logs/log.amine_polymers
 
 
 # simulation constants
-variable density equal 0.45
+variable density equal 0.85
 variable N_beads equal 50000
 variable N_chains equal round(${N_beads} / 30)  # total number of polymers, each of length 30
 variable wall_size equal (${N_beads} / ${density})^(1/3)  # box size to achieve desired density
