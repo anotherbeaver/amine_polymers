@@ -29,7 +29,8 @@ log logs/log.amine_polymers
 # simulation constants
 variable density equal 0.85
 variable N_beads equal 50000
-variable N_chains equal round(${N_beads} / 30)  # total number of polymers, each of length 30
+variable chain_length equal 30
+variable N_chains equal round(${N_beads} / ${chain_length})  # total number of polymers, each of length 30
 variable wall_size equal (${N_beads} / ${density})^(1/3)  # box size to achieve desired density
 print "Calculated box size is ${wall_size}"
 
@@ -143,9 +144,9 @@ variable px_z equal c_thermo_press[1] - c_thermo_press[3]
 variable py_z equal c_thermo_press[2] - c_thermo_press[3]
 
 # compute average end to end length of a chain (atom ID 1 and 30, so only works for chain length 30)
-variable dxx equal x[1] - x[30]
-variable dyy equal y[1] - y[30]
-variable dzz equal z[1] - z[30]
+variable dxx equal x[1] - x[${chain_length}]
+variable dyy equal y[1] - y[${chain_length}]
+variable dzz equal z[1] - z[${chain_length}]
 variable re2 equal v_dxx*v_dxx + v_dyy*v_dyy + v_dzz*v_dzz
 variable re equal sqrt(v_re2)
 fix endtoend all ave/time 100 100 10000 v_re file logs/endtoend_short.dat
@@ -175,7 +176,7 @@ else &
     "run 24000000"
 
 
-variable density equal ${natoms} / (30 * 30 * 30)
+variable density equal ${natoms} / (${wall_size} * ${wall_size} * ${wall_size})
 print "Final density is ${density}"
 
 print "Ending in.amine_polymers_sh_short"
