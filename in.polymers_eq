@@ -8,7 +8,7 @@ units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
 boundary p p p
 atom_style bond 
-log logs/log.polymers append
+log logs/log.polymers_eq
 
 #----------------------------------
 # C O N S T A N T S
@@ -44,6 +44,8 @@ print "Calculated box size is ${wall_size}"
 
 # duration constants
 variable soft_eq_steps equal 400000
+variable interim_eq_steps equal 100000
+variable eq_tol equal 0.01 # tolerance for pressure equilibration, in LJ units
 variable thermo_eq_steps equal 100000
 variable max_thermo_eq_iters equal 100
 
@@ -91,19 +93,19 @@ fix limit all nve/limit 0.02
 # run 200
 
 # energy minimization to relax overlaps at beginning
-# print "30 Minimization start"
-# min_style cg             # fire more robust than cg
-# minimize 1.0e-6 1.0e-8 20000 200000
+print "30 Minimization start"
+min_style cg             # fire more robust than cg
+minimize 1.0e-6 1.0e-8 20000 200000
 
 # soft potential
 pair_style soft 1.0
 pair_coeff * * 0.0 
-variable prefactor equal ramp(0, 50) # linearly ramp prefactor
+variable prefactor equal ramp(4, 200) # linearly ramp prefactor
 fix soft all adapt 1 pair soft a * * v_prefactor
 
 fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
 fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat
-timestep 0.005
+timestep 0.001
 thermo 100
 run ${soft_eq_steps}
 
@@ -115,9 +117,33 @@ unfix soft
 print "Soft potential relaxation complete"
 
 #------------------------------------------------------------
+# I N T E R M E D I A T E      R E L A X A T I O N
+#------------------------------------------------------------
+# # in between, start reducing soft and increasing WCA to prevent flying apart
+# variable scaling equal ramp(1.0, 0.0)
+# # variable other_scaling equal 1.0-v_scaling
+
+# pair_style hybrid/scaled v_scaling soft 1.0 v_scaling lj/cut 1.4592006628 v_scaling gauss 2.0 # cutoff for both at 2.0
+# pair_coeff * * soft 50.0
+# pair_coeff 1 1 lj/cut 0.0 1.3  # no WCA between backbone beads, will ramp up
+# pair_coeff 1 2 lj/cut 0.0 1.3  # WCA between backbone and amine patches
+# pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
+# pair_modify shift yes # shift to zero at cutoff
+# pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
+
+# fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
+# fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat for equilibration to speed up convergence
+# timestep 0.005
+# thermo 100
+# run ${interim_eq_steps}
+
+# unfix 1
+# unfix 2
+# print "Interim relaxation complete"
+
+#------------------------------------------------------------
 # T H E R M A L      E Q U I L I B R A T I O N
 #------------------------------------------------------------
-
 # interatomic potentials (non-bonded)
 pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0 # cutoff for both at 2.0
 pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
@@ -127,8 +153,8 @@ pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
 # initial velocities for equilibration
-timestep 0.001 # could be 0.001, Raffaeilli and Ellenbroek, Soft Matter 2021
-velocity all create 1.0 1 # initial temperature 1.0, random seed 1
+timestep 0.005
+# velocity all create 1.0 1 # initial temperature 1.0, random seed 1
 
 fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
 fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat for equilibration to speed up convergence
