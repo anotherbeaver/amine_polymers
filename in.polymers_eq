@@ -43,7 +43,7 @@ variable wall_size equal (${N_beads} / ${density})^(1/3)  # box size to achieve 
 print "Calculated box size is ${wall_size}"
 
 # duration constants
-variable soft_eq_steps equal 400000
+variable soft_eq_steps equal 10000 # must be a multiple of 50 due to force stopping
 variable interim_eq_steps equal 100000
 variable eq_tol equal 0.01 # tolerance for pressure equilibration, in LJ units
 variable thermo_eq_steps equal 100000
@@ -98,21 +98,50 @@ min_style cg             # fire more robust than cg
 minimize 1.0e-6 1.0e-8 20000 200000
 
 # soft potential
-pair_style soft 1.0
-pair_coeff * * 0.0 
-variable prefactor equal ramp(4, 200) # linearly ramp prefactor
-fix soft all adapt 1 pair soft a * * v_prefactor
+pair_style soft 1.12246
+pair_coeff * * 4.0 
+# variable prefactor equal ramp(4, 800) # linearly ramp prefactor
+# fix soft all adapt 1 pair soft a * * v_prefactor
 
-fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
+fix 1 all langevin 1.0 1.0 0.5 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
 fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat
+fix damp all momentum 50 linear 1 1 1 # zero out momentum every 50 steps to prevent drifting
 timestep 0.001
 thermo 100
-run ${soft_eq_steps}
+
+run 200000
+
+pair_coeff * * 20.0
+run 200000
+
+pair_coeff * * 100.0
+run 200000
+
+# variable soft_loops equal floor(${soft_eq_steps}/50)
+# variable i loop ${soft_loops}
+# label loop
+
+# run 50
+# velocity all set 0.0 0.0 0.0 # zero out velocities every 50 steps
+
+# next i
+# jump SELF loop
+
+pair_style hybrid/overlay soft 1.12246 lj/cut 1.4592006628
+pair_coeff * * soft 0.0
+pair_coeff 1 1 lj/cut 0.05 1.3  # WCA between backbone beads
+run 200000
+
+unfix damp
+
+
+pair_style lj/cut 1.12246
+pair_coeff * * 1.0 1.3
+run 500000
 
 unfix 1
 unfix 2
 unfix limit
-unfix soft
 
 print "Soft potential relaxation complete"
 
