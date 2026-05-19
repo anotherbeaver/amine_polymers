@@ -110,7 +110,7 @@ print "damping coefficient is $(200.0*dt)"
 # equilibration run
 thermo 100
 dump eq all atom 100 data/equilibration.lammpstrj
-run 5000000
+run 10000000
 undump eq
 reset_timestep 0
 print "Equilibration done"
