@@ -11,3 +11,4 @@ my_env
 logs/press_50_spacing10_seed200.dat
 /data/archive/
 # !/data/*
+*.out
