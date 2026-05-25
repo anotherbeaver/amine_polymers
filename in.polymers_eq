@@ -43,7 +43,7 @@ variable wall_size equal (${N_beads} / ${density})^(1/3)  # box size to achieve 
 print "Calculated box size is ${wall_size}"
 
 # duration constants
-variable soft_eq_steps equal 10000 # must be a multiple of 50 due to force stopping
+variable soft_eq_steps equal 10000
 variable interim_eq_steps equal 100000
 variable eq_tol equal 0.01 # tolerance for pressure equilibration, in LJ units
 variable thermo_eq_steps equal 100000
@@ -88,12 +88,12 @@ comm_modify cutoff 3.5
 # I N I T I A L      R E L A X A T I O N
 #-----------------------------------------------
 
-dump eq all custom 10000 data/equilibration.lammpstrj id type mol x y z ix iy iz
+dump eq all custom 10000 data/dumps/equilibration.lammpstrj id type mol x y z ix iy iz
 restart 10000 data/restart/equilibration.restart data/restart/equilibration.restart
 
 compute cc1 all chunk/atom molecule
 compute myChunk all gyration/chunk cc1
-fix gyration all ave/time 100 1 100 c_myChunk file tmp.out mode vector
+fix gyration all ave/time 1000 1 1000 c_myChunk file data/r_gyration.out mode vector
 
 fix limit all nve/limit 0.02
 # run 200
@@ -151,7 +151,7 @@ run 200000
 pair_style hybrid/overlay soft 1.12246 lj/cut 1.4592006628
 pair_coeff * * soft 0.0
 pair_coeff 1 1 lj/cut 0.05 1.3  # WCA between backbone beads
-run 200000
+run 500000
 
 unfix damp
 
@@ -190,66 +190,66 @@ print "Soft potential relaxation complete"
 # unfix 2
 # print "Interim relaxation complete"
 # TODO uncomment below here to return thermal eq 
-# #------------------------------------------------------------
-# # T H E R M A L      E Q U I L I B R A T I O N
-# #------------------------------------------------------------
-# # interatomic potentials (non-bonded)
-# pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0 # cutoff for both at 2.0
-# pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
-# pair_coeff 1 2 lj/cut 0.0 1.3  # WCA between backbone and amine patches
-# pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
-# pair_modify shift yes # shift to zero at cutoff
-# pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
+#------------------------------------------------------------
+# T H E R M A L      E Q U I L I B R A T I O N
+#------------------------------------------------------------
+# interatomic potentials (non-bonded)
+pair_style hybrid/overlay lj/cut 1.4592006628 gauss 2.0 # cutoff for both at 2.0
+pair_coeff 1 1 lj/cut 1.0 1.3  # WCA between backbone beads
+pair_coeff 1 2 lj/cut 0.0 1.3  # WCA between backbone and amine patches
+pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
+pair_modify shift yes # shift to zero at cutoff
+pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
-# # initial velocities for equilibration
-# timestep 0.005
-# # velocity all create 1.0 1 # initial temperature 1.0, random seed 1
+# initial velocities for equilibration
+timestep 0.005
+# velocity all create 1.0 1 # initial temperature 1.0, random seed 1
 
-# fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
-# fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat for equilibration to speed up convergence
+fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
+fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat for equilibration to speed up convergence
 
-# # initial setup
-# thermo 100
-# compute press all pressure thermo_temp # comparing pressure over time to see when eq'ed
+# initial setup
+thermo 100
+compute press all pressure thermo_temp # comparing pressure over time to see when eq'ed
 
-# # in case we can't equilibrate, don't want inifinite loop
-# variable iteration equal 0
+# in case we can't equilibrate, don't want inifinite loop
+variable iteration equal 0
 
-# # first run to get initial value, subsequent runs don't need this since we can just use the previous value
-# fix prev_ave_fix all ave/time 1 ${thermo_eq_steps} ${thermo_eq_steps} c_press
-# # run ${thermo_eq_steps} # switching to set runtime just to check long term behaviour
-# run 20000000
-# variable prev_ave equal f_prev_ave_fix
-# variable prev_snapshot equal ${prev_ave}
-# unfix prev_ave_fix
+# first run to get initial value, subsequent runs don't need this since we can just use the previous value
+fix prev_ave_fix all ave/time 1 ${thermo_eq_steps} ${thermo_eq_steps} c_press
+# run ${thermo_eq_steps} # switching to set runtime just to check long term behaviour
+run 20000000
+variable prev_ave equal f_prev_ave_fix
+variable prev_snapshot equal ${prev_ave}
+unfix prev_ave_fix
 
-# # ########### LOOP STARTS HERE ############
-# # label eq
+# ########### LOOP STARTS HERE ############
+# label eq
 
-# # # check iter. count end conditions
-# # if "${iteration} > ${max_thermo_eq_iters}" then &
-# #     "print 'Equilibration did not converge after ${max_thermo_eq_iters} iterations, exiting with error'" &
-# #     "quit 1"
+# # check iter. count end conditions
+# if "${iteration} > ${max_thermo_eq_iters}" then &
+#     "print 'Equilibration did not converge after ${max_thermo_eq_iters} iterations, exiting with error'" &
+#     "quit 1"
 
-# # fix current_ave_fix all ave/time 1 ${thermo_eq_steps} ${thermo_eq_steps} c_press
-# # run ${thermo_eq_steps}
-# # variable current_ave equal f_current_ave_fix
-# # variable current_snapshot equal ${current_ave}
-# # variable difference equal abs(${current_snapshot} - ${prev_snapshot})
-# # print 'from ${prev_snapshot} to ${current_snapshot}'
-# # print 'difference is ${difference}, the tolerance is ${eq_tol}'
+# fix current_ave_fix all ave/time 1 ${thermo_eq_steps} ${thermo_eq_steps} c_press
+# run ${thermo_eq_steps}
+# variable current_ave equal f_current_ave_fix
+# variable current_snapshot equal ${current_ave}
+# variable difference equal abs(${current_snapshot} - ${prev_snapshot})
+# print 'from ${prev_snapshot} to ${current_snapshot}'
+# print 'difference is ${difference}, the tolerance is ${eq_tol}'
 
-# # # check EQ end conditions
-# # variable iteration equal ${iteration} + 1
-# # if "${difference} > ${eq_tol}" then &
-# #     "variable prev_snapshot equal ${current_snapshot}" &
-# #     "jump SELF eq" &
-# # else &
-# #     "print 'thermal equilibration complete'" &
+# # check EQ end conditions
+# variable iteration equal ${iteration} + 1
+# if "${difference} > ${eq_tol}" then &
+#     "variable prev_snapshot equal ${current_snapshot}" &
+#     "jump SELF eq" &
+# else &
+#     "print 'thermal equilibration complete'" &
 
-# ########### LOOP ENDS HERE ############
-# # unfix current_ave_fix
-# undump eq
-# unfix gyration
-# reset_timestep 0
-# print "Equilibration done"
+########### LOOP ENDS HERE ############
+# unfix current_ave_fix
+undump eq
+unfix gyration
+reset_timestep 0
+print "Equilibration done"
