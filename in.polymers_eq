@@ -17,17 +17,19 @@ variable patch_bond_r0 equal 0.45 # input from run.sh
 variable patch_gauss_B_width equal 13.8504255125 # input from run.sh
 variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches
 
-# default form of molecule filename: "data/polymer_chainlength_{chain_length}_aminespacing_{amine_spacing}_backbone2patch_{backbone_to_patch}.molecule"
-variable molecule_file string "data/polymer_chainlength_30_aminespacing_0_backbone2patch_0.45.molecule"
+
 
 
 # simulation constants
 variable density equal 0.85
-variable N_beads equal 24000
-variable chain_length equal 30
+# variable N_beads equal 24000
+# variable chain_length equal 30
 variable N_chains equal round(${N_beads} / ${chain_length})  # total number of polymers, each of length 200
 variable wall_size equal (${N_beads} / ${density})^(1/3) # box size to achieve desired density, scale by lj sigma of 1.3
 print "Calculated box size is ${wall_size}"
+
+# default form of molecule filename: "data/polymer_chainlength_{chain_length}_aminespacing_{amine_spacing}_backbone2patch_{backbone_to_patch}.molecule"
+variable molecule_file string "data/polymer_chainlength_${chain_length}_aminespacing_0_backbone2patch_0.45.molecule"
 
 # current run setup
 variable output_traj equal 0
@@ -95,7 +97,7 @@ comm_modify cutoff 3.5
 # I N I T I A L      R E L A X A T I O N
 #-----------------------------------------------
 
-dump eq all custom 10000 ${output_traj_file} id type mol x y z ix iy iz
+dump eq all custom 1000000 ${output_traj_file} id type mol x y z ix iy iz
 restart 10000 ${restart_file} ${restart_file}
 
 compute cc1 all chunk/atom molecule
