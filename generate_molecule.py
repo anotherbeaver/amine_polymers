@@ -10,7 +10,7 @@ Note that the formatting of individual atoms has been split across the sections 
 import argparse
 
 
-def generate_molecule_file(filename='data/polymer.molecule',
+def generate_molecule_file(filename=None,
                            chain_length=25,
                            amine_spacing=5,
                            backbone_to_patch=0.45):
@@ -29,6 +29,9 @@ def generate_molecule_file(filename='data/polymer.molecule',
         amine_positions = list(range(amine_spacing, chain_length, amine_spacing))
         if amine_positions[-1] == chain_length - 1:
             print("Warning: Last monomer is an amine patch. This affects chain length.")
+    
+    if filename is None:
+        filename = f"data/polymer_chainlength_{chain_length}_aminespacing_{amine_spacing}_backbone2patch_{backbone_to_patch}.molecule"
 
     N = chain_length + len(amine_positions)  # total atoms
     
@@ -91,7 +94,7 @@ def generate_chain_positions():
 if __name__ == "__main__":
     # generate_chain_positions()
     args = argparse.ArgumentParser()
-    args.add_argument('--filename', type=str, default='data/polymer.molecule', help='Output filename')
+    args.add_argument('--filename', type=str, default=None, help='Output filename')
     args.add_argument('--chain_length', type=int, default=25, help='Length of the polymer chain')
     args.add_argument('--amine_spacing', type=int, default=5, help='Spacing between amine patches')
     args.add_argument('--backbone_to_patch', type=float, default=0.45, help='Distance from backbone to patch')
