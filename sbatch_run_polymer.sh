@@ -2,9 +2,10 @@
 #SBATCH --job-name=plain_polymer
 #SBATCH --account=st-jrottler-1
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --time=25:00:00
-#SBATCH --mem=16G
+#SBATCH --ntasks=4
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=8G
+#SBATCH --time=20:00:00
 #SBATCH --partition=skylake
 #SBATCH --array=0-2
 #SBATCH --output=logs/plain_polymer_%A_%a.out
@@ -67,11 +68,18 @@ python3 generate_molecule.py \
 # -----------------------------
 # Run LAMMPS
 # -----------------------------
-srun ${LAMMPS} -in "${INPUTEQ}" \
-    -var chain_length "${N}" \
-    -var N_beads "${N_beads}"
-zsrun ${LAMMPS} -in "${INPUTPROD}" \
-    -var chain_length "${N}" \
-    -var N_beads "${N_beads}"
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OMP_PROC_BIND=close
+export OMP_PLACES=cores
+
+# srun ${LAMMPS} -in "${INPUTEQ}" \
+#     -var chain_length "${N}" \
+#     -var N_beads "${N_beads}"
+srun ${LAMMPS} \
+  -sf omp \
+  -pk omp ${OMP_NUM_THREADS} \
+  -in "${INPUTPROD}" \
+  -var chain_length "${N}" \
+  -var N_beads "${N_beads}"
 
 echo "Finished at $(date)"

@@ -9,8 +9,8 @@ print "Starting in.polymers"
 
 # simulation constants
 variable density equal 0.85
-variable N_beads equal 24000
-variable chain_length equal 30
+# variable N_beads equal 24000
+# variable chain_length equal 30
 variable N_chains equal round(${N_beads} / ${chain_length})  # total number of polymers, each of length 200
 variable wall_size equal (${N_beads} / ${density})^(1/3)  # box size to achieve desired density
 print "Calculated box size is ${wall_size}"
@@ -61,15 +61,15 @@ neigh_modify every 1 delay 0 check yes
 comm_modify cutoff 3.5
 
 # interatomic potentials (non-bonded)
-pair_style hybrid/overlay lj/cut 1.12246205 gauss 2.0 # cutoff for both at 2.0
-pair_coeff 1 1 lj/cut 1.0 1.0  # WCA between backbone beads
-pair_coeff 1 2 lj/cut 0.0 1.0  # WCA between backbone and amine patches
-pair_coeff 2 2 lj/cut 0.0 1.0 # no WCA between amine patches
+pair_style hybrid/overlay lj/cut/omp 1.12246205 gauss/omp 2.0 # cutoff for both at 2.0
+pair_coeff 1 1 lj/cut/omp 1.0 1.0  # WCA between backbone beads
+pair_coeff 1 2 lj/cut/omp 0.0 1.0  # WCA between backbone and amine patches
+pair_coeff 2 2 lj/cut/omp 0.0 1.0 # no WCA between amine patches
 pair_modify shift yes # shift to zero at cutoff
-pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
+pair_coeff 2 2 gauss/omp ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
-fix langevin_int all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
-fix nve_int all nve # switch to NVE ensemble
+fix langevin_int all langevin/omp 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
+fix nve_int all nve/omp # switch to NVE ensemble
 
 # save mean squared displacement data (optional)
 if "${output_msd} == 1" then &
