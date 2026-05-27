@@ -135,28 +135,6 @@ run 200000
 pair_coeff * * 100.0
 run 200000
 
-# # run soft w/ 200.0
-# pair_coeff * * 200.0
-# run 200000
-
-# # run soft w/ 500.0
-# pair_coeff * * 500.0
-# run 200000
-
-# # run soft w/ 1000.0
-# pair_coeff * * 1000.0
-# run 200000
-
-# variable soft_loops equal floor(${soft_eq_steps}/50)
-# variable i loop ${soft_loops}
-# label loop
-
-# run 50
-# velocity all set 0.0 0.0 0.0 # zero out velocities every 50 steps
-
-# next i
-# jump SELF loop
-
 pair_style hybrid/overlay soft/omp 1.12246 lj/cut/omp 1.4592006628
 pair_coeff * * soft/omp 0.0
 pair_coeff 1 1 lj/cut/omp 0.05 1.0  # WCA between backbone beads
@@ -174,31 +152,6 @@ unfix limit
 
 print "Soft potential relaxation complete"
 
-#------------------------------------------------------------
-# I N T E R M E D I A T E      R E L A X A T I O N
-#------------------------------------------------------------
-# # in between, start reducing soft and increasing WCA to prevent flying apart
-# variable scaling equal ramp(1.0, 0.0)
-# # variable other_scaling equal 1.0-v_scaling
-
-# pair_style hybrid/scaled v_scaling soft 1.0 v_scaling lj/cut 1.4592006628 v_scaling gauss 2.0 # cutoff for both at 2.0
-# pair_coeff * * soft 50.0
-# pair_coeff 1 1 lj/cut 0.0 1.3  # no WCA between backbone beads, will ramp up
-# pair_coeff 1 2 lj/cut 0.0 1.3  # WCA between backbone and amine patches
-# pair_coeff 2 2 lj/cut 0.0 1.3 # no WCA between amine patches
-# pair_modify shift yes # shift to zero at cutoff
-# pair_coeff 2 2 gauss ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
-
-# fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
-# fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat for equilibration to speed up convergence
-# timestep 0.005
-# thermo 100
-# run ${interim_eq_steps}
-
-# unfix 1
-# unfix 2
-# print "Interim relaxation complete"
-# TODO uncomment below here to return thermal eq 
 #------------------------------------------------------------
 # T H E R M A L      E Q U I L I B R A T I O N
 #------------------------------------------------------------
@@ -219,45 +172,8 @@ fix 2 all nve/omp # NVE ensemble for production run, but use Langevin thermostat
 
 # initial setup
 thermo 100
-compute press all pressure thermo_temp # comparing pressure over time to see when eq'ed
-
-# in case we can't equilibrate, don't want inifinite loop
-variable iteration equal 0
-
-# first run to get initial value, subsequent runs don't need this since we can just use the previous value
-fix prev_ave_fix all ave/time 1 ${thermo_eq_steps} ${thermo_eq_steps} c_press
-# run ${thermo_eq_steps} # switching to set runtime just to check long term behaviour
 run 5000000
-variable prev_ave equal f_prev_ave_fix
-variable prev_snapshot equal ${prev_ave}
-unfix prev_ave_fix
 
-# ########### LOOP STARTS HERE ############
-# label eq
-
-# # check iter. count end conditions
-# if "${iteration} > ${max_thermo_eq_iters}" then &
-#     "print 'Equilibration did not converge after ${max_thermo_eq_iters} iterations, exiting with error'" &
-#     "quit 1"
-
-# fix current_ave_fix all ave/time 1 ${thermo_eq_steps} ${thermo_eq_steps} c_press
-# run ${thermo_eq_steps}
-# variable current_ave equal f_current_ave_fix
-# variable current_snapshot equal ${current_ave}
-# variable difference equal abs(${current_snapshot} - ${prev_snapshot})
-# print 'from ${prev_snapshot} to ${current_snapshot}'
-# print 'difference is ${difference}, the tolerance is ${eq_tol}'
-
-# # check EQ end conditions
-# variable iteration equal ${iteration} + 1
-# if "${difference} > ${eq_tol}" then &
-#     "variable prev_snapshot equal ${current_snapshot}" &
-#     "jump SELF eq" &
-# else &
-#     "print 'thermal equilibration complete'" &
-
-########### LOOP ENDS HERE ############
-# unfix current_ave_fix
 undump eq
 unfix gyration
 reset_timestep 0
