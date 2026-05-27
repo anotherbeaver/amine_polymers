@@ -72,11 +72,11 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PROC_BIND=close
 export OMP_PLACES=cores
 
-srun ${LAMMPS} -in "${INPUTEQ}" \
-    -sf omp \
-    -pk omp ${OMP_NUM_THREADS} \
-    -var chain_length "${N}" \
-    -var N_beads "${N_beads}"
+# srun ${LAMMPS} -in "${INPUTEQ}" \
+#     -sf omp \
+#     -pk omp ${OMP_NUM_THREADS} \
+#     -var chain_length "${N}" \
+#     -var N_beads "${N_beads}"
 srun ${LAMMPS} \
   -sf omp \
   -pk omp ${OMP_NUM_THREADS} \

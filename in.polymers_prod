@@ -4,6 +4,15 @@
 print "Starting in.polymers"
 
 #----------------------------------
+# O M P    S E T T I N G S
+#----------------------------------
+# this works on sockeye/skylake, will definitely change for other machines
+# and even my box
+
+suffix omp
+package omp 8
+
+#----------------------------------
 # C O N S T A N T S
 #----------------------------------
 
@@ -68,7 +77,7 @@ pair_coeff 2 2 lj/cut/omp 0.0 1.0 # no WCA between amine patches
 pair_modify shift yes # shift to zero at cutoff
 pair_coeff 2 2 gauss/omp ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between amine patches
 
-fix langevin_int all langevin/omp 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
+fix langevin_int all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
 fix nve_int all nve/omp # switch to NVE ensemble
 
 # save mean squared displacement data (optional)

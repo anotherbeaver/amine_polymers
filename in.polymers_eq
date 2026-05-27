@@ -3,6 +3,9 @@
 # mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.polymers
 print "Starting in.polymers"
 
+suffix omp
+package omp 8
+
 # simulation format parameters
 units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
@@ -119,7 +122,7 @@ pair_coeff * * 4.0
 # fix soft all adapt 1 pair soft a * * v_prefactor
 
 fix 1 all langevin 1.0 1.0 0.5 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
-fix 2 all nve # NVE ensemble for production run, but use Langevin thermostat
+fix 2 all nve/omp # NVE ensemble for production run, but use Langevin thermostat
 fix damp all momentum 50 linear 1 1 1 # zero out momentum every 50 steps to prevent drifting
 timestep 0.001
 thermo 100
