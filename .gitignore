@@ -13,3 +13,4 @@ logs/press_50_spacing10_seed200.dat
 # !/data/*
 *.out
 *.restart
+restart.*
