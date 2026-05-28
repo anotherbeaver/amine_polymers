@@ -170,7 +170,7 @@ pair_coeff 2 2 gauss/omp ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # 
 timestep 0.005
 # velocity all create 1.0 1 # initial temperature 1.0, random seed 1
 
-fix 1 all langevin/omp 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
+fix 1 all langevin 1.0 1.0 200.0 ${random_seed} # Langevin thermostat, temp 1.0, damping parameter $(200.0*dt), random seed 12345
 fix 2 all nve/omp # NVE ensemble for production run, but use Langevin thermostat for equilibration to speed up convergence
 
 # initial setup
