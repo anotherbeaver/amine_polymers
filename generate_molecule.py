@@ -4,22 +4,13 @@ Similar to generate_data.py but generates a .molecule file, which should be easi
 Note that the formatting of individual atoms has been split across the sections for molecule entries
 """
 
-
-
-
 import argparse
 
 
 def generate_molecule_file(filename=None,
                            chain_length=25,
                            patch_spacing=5,
-                           backbone_to_patch=0.45):
-    
-    BOX_X = chain_length + 2 # length of monomer-monomer distances with extra padding (1)
-    BOX_Y = 1.45 # patch height (.45) + padding (1)
-    BOX_Z = 1.2 # padding (1.2)
-
-
+                           backbone_to_patch=0.35):
 
     if patch_spacing > chain_length:
         print("Warning: Patch spacing cannot be greater than chain length.")
@@ -28,7 +19,7 @@ def generate_molecule_file(filename=None,
     else:
         patch_positions = list(range(patch_spacing, chain_length, patch_spacing))
         if patch_positions[-1] == chain_length - 1:
-            print("Warning: Last monomer is a patch. This affects chain length.")
+            print("Warning: Last monomer is a patch. This affects chain length (slightly).")
 
     if filename is None:
         filename = f"data/polymer_chainlength_{chain_length}_patchspacing_{patch_spacing}_backbone2patch_{backbone_to_patch}.molecule"
@@ -41,11 +32,6 @@ def generate_molecule_file(filename=None,
         # Counts 
         f.write(f"{N} atoms\n") # each patch position has 2 atoms (patch + dummy)
         f.write(f"{N - 1} bonds\n") # each patch position has 2 bonds (to dummy and dummy to patch)
-
-        # # Masses
-        # f.write("\nMasses\n\n")
-        # f.write("1 1.0\n")    # backbone + dummy mass
-        # f.write("2 1\n\n")   # patch mass TODO: figure out if we can reduce this without blowing up the simulation
 
         f.write("Coords\n\n")
         for i in range(chain_length):
@@ -60,11 +46,6 @@ def generate_molecule_file(filename=None,
             patch_id = chain_length + idx + 1
             f.write(f"{patch_id} 2\n")
 
-
-        # f.write("\nMasses\n\n")
-        # for i in range(N):
-        #     f.write(f"{i+1} 1.0\n")
-
         f.write("\nBonds\n\n")
         for i in range(chain_length - 1):
             f.write(f"{i+1} 1 {i+1} {i+2}\n")
@@ -74,25 +55,8 @@ def generate_molecule_file(filename=None,
 
     return filename
 
-def generate_chain_positions():
-    """
-    Generate positions for chains of particles.
-    
-    Returns:
-        List of tuples: (particle_id, x, y, z)
-    """
-    # positions = []
-    # for chain_id in range(num_chains):
-    #     for i in range(chain_length):
-    #         x = chain_id * patch_spacing
-    #         y = 0.0
-    #         z = i * patch_spacing
-    #         positions.append((chain_id * chain_length + i + 1, x, y, z))
-    # return positions
-    pass
 
 if __name__ == "__main__":
-    # generate_chain_positions()
     args = argparse.ArgumentParser()
     args.add_argument('--filename', type=str, default=None, help='Output filename')
     args.add_argument('--chain_length', type=int, default=25, help='Length of the polymer chain')

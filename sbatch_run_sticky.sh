@@ -75,7 +75,7 @@ echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_
 # -----------------------------
 python3 generate_molecule.py \
     --chain_length ${N} \
-    --amine_spacing 0 
+    --patch_spacing ${patch_spacing} \
 
 # -----------------------------
 # Run LAMMPS
