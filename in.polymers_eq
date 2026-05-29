@@ -4,7 +4,7 @@
 print "Starting in.polymers"
 
 suffix omp
-package omp 4
+package omp 8
 
 # simulation format parameters
 units lj    #  Lennard-Jones units, essentially unitless
