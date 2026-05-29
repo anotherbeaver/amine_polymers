@@ -5,7 +5,7 @@
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8G
-#SBATCH --time=00:10:00
+#SBATCH --time=80:00:00
 #SBATCH --partition=skylake
 #SBATCH --output=logs/test_sticky_polymer_%A_%a.out
 #SBATCH --error=logs/test_sticky_polymer_%A_%a.err
