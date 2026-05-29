@@ -2,20 +2,21 @@
 #SBATCH --job-name=plain_polymer
 #SBATCH --account=st-jrottler-1
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
-#SBATCH --cpus-per-task=8
+#SBATCH --ntasks=8
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
-#SBATCH --time=20:00:00
+#SBATCH --time=00:10:00
 #SBATCH --partition=skylake
-#SBATCH --array=0-2
-#SBATCH --output=logs/plain_polymer_%A_%a.out
-#SBATCH --error=logs/plain_polymer_%A_%a.err
+#SBATCH --output=logs/test_plain_polymer_%A_%a.out
+#SBATCH --error=logs/test_plain_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=azhu13@student.ubc.ca
 
+# this file is for benchmarking purposes
+
 set -e
 
-echo "Job ${SLURM_JOB_ID}, task ${SLURM_ARRAY_TASK_ID}"
+echo "Job ${SLURM_JOB_ID}"
 echo "Started on $(hostname) at $(date)"
 
 # -----------------------------
@@ -24,7 +25,6 @@ echo "Started on $(hostname) at $(date)"
 module purge
 module load gcc openmpi python
 cd "$SLURM_SUBMIT_DIR"
-export OMP_NUM_THREADS=1
 
 # -----------------------------
 # Paths
@@ -44,17 +44,17 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 # -----------------------------
 # Parameter space
 # -----------------------------
-N_list=(30 100 200) # length of chains
-N_beads_list=(24000 40000 80000)
+# N_list=(30 100 200) # length of chains
+# N_beads_list=(24000 40000 80000)
 
 # -----------------------------
 # Map array index -> parameters
 # -----------------------------
 
 # Flatten 3D parameter space into single array index
-index=$((SLURM_ARRAY_TASK_ID))
-N=${N_list[$index]}
-N_beads=${N_beads_list[$index]}
+# index=$((SLURM_ARRAY_TASK_ID))
+N=29
+N_beads=20000
 
 echo "Running N=${N}, N_beads=${N_beads}"
 

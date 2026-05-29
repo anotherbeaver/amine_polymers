@@ -3,6 +3,9 @@
 # mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.polymers
 print "Starting in.polymers"
 
+suffix omp
+package omp 4
+
 # simulation format parameters
 units lj    #  Lennard-Jones units, essentially unitless
 dimension 3
@@ -16,8 +19,6 @@ atom_style bond
 variable patch_bond_r0 equal 0.45 # input from run.sh
 variable patch_gauss_B_width equal 13.8504255125 # input from run.sh
 variable patch_gauss_A_strength equal 50 # strength of Gaussian attraction between amine patches
-
-
 
 
 # simulation constants
@@ -138,13 +139,13 @@ run 200000
 pair_style hybrid/overlay soft/omp 1.12246 lj/cut/omp 1.4592006628
 pair_coeff * * soft/omp 0.0
 pair_coeff 1 1 lj/cut/omp 0.05 1.0  # WCA between backbone beads
-run 500000
+run 50000
 
 unfix damp
 
 pair_style lj/cut 1.12246
 pair_coeff * * 1.0 1.0
-run 500000
+run 50000
 
 unfix 1
 unfix 2
@@ -172,7 +173,7 @@ fix 2 all nve/omp # NVE ensemble for production run, but use Langevin thermostat
 
 # initial setup
 thermo 100
-run 5000000
+run 50000
 
 undump eq
 unfix gyration
