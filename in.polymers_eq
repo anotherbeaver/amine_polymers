@@ -95,7 +95,7 @@ compute cc1 all chunk/atom molecule
 compute myChunk all gyration/chunk cc1
 fix gyration all ave/time 1000 1 1000 c_myChunk file data/r_gyration.out mode vector
 
-fix limit all nve/limit 0.02
+# fix limit all nve/limit 0.02
 # run 200
 
 # energy minimization to relax overlaps at beginning
