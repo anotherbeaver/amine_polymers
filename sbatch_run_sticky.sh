@@ -4,15 +4,16 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
-#SBATCH --time=80:00:00
+#SBATCH --mem=4G
+#SBATCH --array=0-4
+#SBATCH --time=30:00:00
 #SBATCH --partition=skylake
-#SBATCH --output=logs/test_sticky_polymer_%A_%a.out
-#SBATCH --error=logs/test_sticky_polymer_%A_%a.err
+#SBATCH --output=logs/N_30_sticky_polymer_%A_%a.out
+#SBATCH --error=logs/N_30_sticky_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=azhu13@student.ubc.ca
 
-# this file is for benchmarking purposes
+# this file is for the proper sticky production run
 
 set -e
 
@@ -44,9 +45,6 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 # -----------------------------
 # Parameter space
 # -----------------------------
-# N_list=(30 100 200) # lengths of chains (axis 1)
-# N_beads_list=(24000 40000 80000) # number of beads (total system size), each corresponds to a chain length (axis 1)
-# patch_spacing=(15 10 5 4 3 2 1) # spacing between patches (axis 2)
 N_list=(30) # lengths of chains (axis 1)
 N_beads_list=(24000) # number of beads (total system size), each corresponds to a chain length (axis 1)
 patch_spacing_list=(5) # spacing between patches (axis 2)
@@ -62,13 +60,23 @@ index=$((SLURM_ARRAY_TASK_ID))
 
 # temporary, only have one axis rn
 # TODO: need to update this part when we have more axes in the parameter space
-N=${N_list[index]}
-N_beads=${N_beads_list[index]}
-patch_spacing=${patch_spacing_list[index]}
+N=${N_list[0]}
+N_beads=${N_beads_list[0]}
+patch_spacing=${patch_spacing_list[0]}
 patch_strength=${patch_strength_list[index]}
-random_seed=${random_seed_list[index]}
+random_seed=${random_seed_list[0]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
+
+# record parameters to a shared lookup CSV (append-only)
+timestamp=$(date +%Y-%m-%dT%H:%M:%S)
+LOOKUP_FILE="${LOGDIR}/params_lookup.csv"
+if [ ! -f "${LOOKUP_FILE}" ]; then
+  printf "job_id,array_id,timestamp,N,N_beads,patch_spacing,patch_strength,random_seed,hostname,submit_dir,lammps_bin,input_file\n" > "${LOOKUP_FILE}"
+fi
+printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" \
+  "${SLURM_JOB_ID:-}" "${SLURM_ARRAY_TASK_ID:-}" "${timestamp}" "${N}" "${N_beads}" "${patch_spacing}" "${patch_strength}" "${random_seed}" "$(hostname)" "${SLURM_SUBMIT_DIR:-$(pwd)}" "${LAMMPS}" "${INPUTPROD}" >> "${LOOKUP_FILE}"
+echo "Appended parameters to ${LOOKUP_FILE}"
 
 # -----------------------------
 # Molecule generation
@@ -84,9 +92,9 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PROC_BIND=close
 export OMP_PLACES=cores
 
-# srun ${LAMMPS} -in "${INPUTEQ}" \
-#     -var chain_length "${N}" \
-#     -var N_beads "${N_beads}"
+srun ${LAMMPS} -in "${INPUTEQ}" \
+    -var chain_length "${N}" \
+    -var N_beads "${N_beads}"
 srun ${LAMMPS} \
   -sf omp \
   -pk omp ${OMP_NUM_THREADS} \

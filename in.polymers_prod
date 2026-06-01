@@ -92,14 +92,6 @@ variable px_y equal c_thermo_press[1] - c_thermo_press[2]
 variable px_z equal c_thermo_press[1] - c_thermo_press[3]
 variable py_z equal c_thermo_press[2] - c_thermo_press[3]
 
-# compute average end to end length of a chain
-variable dxx equal x[1] - x[${chain_length}]
-variable dyy equal y[1] - y[${chain_length}]
-variable dzz equal z[1] - z[${chain_length}]
-variable re2 equal v_dxx*v_dxx + v_dyy*v_dyy + v_dzz*v_dzz
-variable re equal sqrt(v_re2)
-fix endtoend all ave/time 100 100 10000 v_re file logs/endtoend_short.dat
-
 # compute all_atoms all count/type atom
 variable natoms equal atoms
 print "Total number of atoms is ${natoms}"
@@ -126,11 +118,10 @@ timestep 0.005
 thermo_style custom step temp epair emol etotal press pxy c_temp_com
 thermo 100
 dump prod all custom 1000000 ${output_traj_file} id type mol x y z ix iy iz
-# run 50000
 run 500000000
 undump prod
 
 variable density equal ${natoms} / (${wall_size} * ${wall_size} * ${wall_size})
 print "Final density is ${density}"
 
-print "Ending in.polymers (long)"
+print "Ending in.polymers_prod"

@@ -61,7 +61,7 @@ if __name__ == "__main__":
     args.add_argument('--filename', type=str, default=None, help='Output filename')
     args.add_argument('--chain_length', type=int, default=25, help='Length of the polymer chain')
     args.add_argument('--patch_spacing', type=int, default=5, help='Spacing between sticky patches')
-    args.add_argument('--backbone_to_patch', type=float, default=0.45, help='Distance from backbone to patch')
+    args.add_argument('--backbone_to_patch', type=float, default=0.35, help='Distance from backbone to patch')
     args = args.parse_args()
     print(args)
     fname = generate_molecule_file(
