@@ -147,7 +147,6 @@ run 500000
 
 unfix 1
 unfix 2
-unfix limit
 
 print "Soft potential relaxation complete"
 

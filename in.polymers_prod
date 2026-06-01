@@ -114,6 +114,11 @@ if "${output_press_autocorr} == 1" then &
 
 # experiment run 
 compute temp_com all temp/com
+# centre-of-mass msd calculation
+compute mol_chunks all chunk/atom molecule
+compute mol_msd all msd/chunk mol_chunks
+fix msd_out all ave/time 1000 1 1000 c_mol_msd[4] file data/msd/prodmsd_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat mode scalar
+
 timestep 0.005
 thermo_style custom step temp epair emol etotal press pxy c_temp_com
 thermo 100
