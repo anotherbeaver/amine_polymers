@@ -83,7 +83,7 @@ echo "Appended parameters to ${LOOKUP_FILE}"
 # -----------------------------
 python3 generate_molecule.py \
     --chain_length ${N} \
-    --patch_spacing ${patch_spacing} \
+    --patch_spacing ${patch_spacing}
 
 # -----------------------------
 # Run LAMMPS
@@ -94,12 +94,18 @@ export OMP_PLACES=cores
 
 srun ${LAMMPS} -in "${INPUTEQ}" \
     -var chain_length "${N}" \
-    -var N_beads "${N_beads}"
+    -var N_beads "${N_beads}"\
+    -var patch_spacing "${patch_spacing}" \
+    -var patch_gauss_A_strength "${patch_strength}" \
+    -var random_seed "${random_seed}"
 srun ${LAMMPS} \
   -sf omp \
   -pk omp ${OMP_NUM_THREADS} \
   -in "${INPUTPROD}" \
   -var chain_length "${N}" \
-  -var N_beads "${N_beads}"
+  -var N_beads "${N_beads}" \
+  -var patch_spacing "${patch_spacing}" \
+  -var patch_gauss_A_strength "${patch_strength}" \
+  -var random_seed "${random_seed}" 
 
 echo "Finished at $(date)"
