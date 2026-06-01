@@ -51,7 +51,7 @@ def generate_molecule_file(filename=None,
             f.write(f"{i+1} 1 {i+1} {i+2}\n")
         for idx, pos in enumerate(patch_positions):
             patch_id = chain_length + idx + 1
-            f.write(f"{chain_length - 1 + idx * 2} 2 {pos + 1} {patch_id}\n")
+            f.write(f"{chain_length + idx} 2 {pos + 1} {patch_id}\n")
 
     return filename
 
