@@ -134,7 +134,9 @@ run 500000
 unfix damp
 
 pair_style lj/cut 1.12246
-pair_coeff * * 1.0 1.0
+pair_coeff 1 1 1.0 1.0
+pair_coeff 1 2 0.0 1.0
+pair_coeff 2 2 0.0 1.0
 run 500000
 
 unfix 1
