@@ -38,7 +38,7 @@ def generate_molecule_file(filename=None,
             f.write(f"{i+1} {i+1}.0 0.0 0.0\n")
         for idx, pos in enumerate(patch_positions):
             patch_id = chain_length + idx + 1
-            f.write(f"{patch_id} {pos + 1} {backbone_to_patch} 0.0\n")
+            f.write(f"{patch_id} {pos + 1} {backbone_to_patch * 0.9} 0.0\n")
         f.write("\nTypes\n\n")
         for i in range(chain_length):
             f.write(f"{i+1} 1\n")
