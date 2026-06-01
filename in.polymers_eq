@@ -105,7 +105,9 @@ minimize 1.0e-6 1.0e-8 20000 200000
 
 # soft potential
 pair_style soft/omp 1.12246
-pair_coeff * * 4.0 
+pair_coeff 1 1 4.0
+pair_coeff 1 2 0.0
+pair_coeff 2 2 0.0 
 # variable prefactor equal ramp(4, 800) # linearly ramp prefactor
 # fix soft all adapt 1 pair soft a * * v_prefactor
 
@@ -119,11 +121,15 @@ thermo 100
 run 200000
 
 # run soft w/ 20.0
-pair_coeff * * 20.0
+pair_coeff 1 1 20.0
+pair_coeff 1 2 0.0
+pair_coeff 2 2 0.0 
 run 200000
 
 # run soft w/ 100.0
-pair_coeff * * 100.0
+pair_coeff 1 1 100.0
+pair_coeff 1 2 0.0
+pair_coeff 2 2 0.0 
 run 200000
 
 pair_style hybrid/overlay soft/omp 1.12246 lj/cut/omp 1.4592006628
