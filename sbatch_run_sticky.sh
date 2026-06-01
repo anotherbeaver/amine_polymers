@@ -55,7 +55,7 @@ random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 # Map array index -> parameters
 # -----------------------------
 
-Flatten 3D parameter space into single array index
+# Flatten 3D parameter space into single array index
 index=$((SLURM_ARRAY_TASK_ID))
 
 # temporary, only have one axis rn
