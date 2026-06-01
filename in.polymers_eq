@@ -1,5 +1,3 @@
-# weird little file that isn't intending to do any patchy stuff, just replicating Behbahani and Schmid, Macromolecules 2025
-# as such, running this file directly instead of with run.sh
 # mpirun -np 12 --oversubscribe ../lammps/build/lmp -in in.polymers
 print "Starting in.polymers"
 
@@ -65,9 +63,9 @@ mass 2 1.0 # patch mass
 molecule polymer ${molecule_file}
 
 # intrachain bonds
-bond_style fene/omp
-bond_coeff 1 30.0 1.5 1.0 1.0 # k, r0, epsilon, sigma for FENE bonds between backbone beads
-bond_coeff 2 1000 ${patch_bond_r0} 1.0 1.0  # stiff spring on patches
+bond_style hybrid fene/omp harmonic/omp
+bond_coeff 1 fene/omp 30.0 1.5 1.0 1.0 # k, r0, epsilon, sigma for FENE bonds between backbone beads
+bond_coeff 2 harmonic/omp 1000 0.35  # stiff spring on patches
 special_bonds fene # no interactions between adjacent atoms, but excluded volume for 1-3 and 1-4 interactions
 
 # create atoms
