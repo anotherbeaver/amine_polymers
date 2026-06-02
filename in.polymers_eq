@@ -42,7 +42,7 @@ variable output_press_autocorr equal 0
 variable output_press_autocorr_file string "data/autocorrelation/eqautocorr_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
 
 variable log_file string "logs/log.eq_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
-variable restart_file string "data/restarts/restart.eq_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
+variable restart_file string "data/restarts/restart.eq_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}"
 
 # variable random_seed equal 12345 # input from run.sh
 
@@ -105,7 +105,9 @@ minimize 1.0e-6 1.0e-8 20000 200000
 
 # soft potential
 pair_style soft/omp 1.12246
-pair_coeff * * 4.0 
+pair_coeff 1 1 4.0
+pair_coeff 1 2 0.0
+pair_coeff 2 2 0.0 
 # variable prefactor equal ramp(4, 800) # linearly ramp prefactor
 # fix soft all adapt 1 pair soft a * * v_prefactor
 
@@ -119,14 +121,18 @@ thermo 100
 run 200000
 
 # run soft w/ 20.0
-pair_coeff * * 20.0
+pair_coeff 1 1 20.0
+pair_coeff 1 2 0.0
+pair_coeff 2 2 0.0 
 run 200000
 
 # run soft w/ 100.0
-pair_coeff * * 100.0
+pair_coeff 1 1 100.0
+pair_coeff 1 2 0.0
+pair_coeff 2 2 0.0 
 run 200000
 
-pair_style hybrid/overlay soft/omp 1.12246 lj/cut/omp 1.4592006628
+pair_style hybrid/overlay soft/omp 1.12246 lj/cut/omp 1.12246205
 pair_coeff * * soft/omp 0.0
 pair_coeff 1 1 lj/cut/omp 0.05 1.0  # WCA between backbone beads
 run 500000
@@ -134,12 +140,13 @@ run 500000
 unfix damp
 
 pair_style lj/cut 1.12246
-pair_coeff * * 1.0 1.0
+pair_coeff 1 1 1.0 1.0
+pair_coeff 1 2 0.0 1.0
+pair_coeff 2 2 0.0 1.0
 run 500000
 
 unfix 1
 unfix 2
-unfix limit
 
 print "Soft potential relaxation complete"
 
