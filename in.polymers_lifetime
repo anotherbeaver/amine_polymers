@@ -1,4 +1,4 @@
-print "Starting in.polymers_lifetimes"
+print "Starting in.polymers_lifetime"
 
 suffix omp
 package omp 2
