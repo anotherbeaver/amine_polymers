@@ -77,7 +77,7 @@ group monomer type 1
 group patch type 2
 
 # for visualization in OVITO
-write_data data/data.replicated_particles
+write_data data/dumps/initial_config_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.data
 
 # neighbor list settings
 neighbor 0.3 bin
@@ -139,11 +139,12 @@ run 500000
 
 unfix damp
 
-pair_style lj/cut 1.12246
-pair_coeff 1 1 1.0 1.0
-pair_coeff 1 2 0.0 1.0
-pair_coeff 2 2 0.0 1.0
-run 500000
+# Let's try getting rid of this and just using the following part
+# pair_style lj/cut 1.12246
+# pair_coeff 1 1 1.0 1.0
+# pair_coeff 1 2 0.0 1.0
+# pair_coeff 2 2 0.0 1.0
+# run 500000
 
 unfix 1
 unfix 2

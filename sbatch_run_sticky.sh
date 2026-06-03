@@ -48,7 +48,7 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 N_list=(30) # lengths of chains (axis 1)
 N_beads_list=(24000) # number of beads (total system size), each corresponds to a chain length (axis 1)
 patch_spacing_list=(5) # spacing between patches (axis 2)
-patch_strength_list=(0 20 50 75 100) # strength of patch attraction (axis 3)
+patch_strength_list=(25 30 45 50) # strength of patch attraction (axis 3)
 random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 
 # -----------------------------
