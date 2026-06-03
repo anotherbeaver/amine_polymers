@@ -75,7 +75,7 @@ if "${output_patch} == 1" then &
 # save trajectory of ONLY PATCHES (optional), takes a lot of space
 if "${output_traj} == 1" then &
     "print 'Saving trajectory to ${output_traj_file}'" &
-    "dump traj all custom 100 ${output_traj_file} id type mol x y z ix iy iz"
+    "dump traj 2 custom 10 ${output_traj_file} id type mol x y z ix iy iz"
 
 # save p_xy data for modulus calculation
 if "${output_press} == 1" then &
