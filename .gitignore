@@ -17,3 +17,5 @@ logs/press_50_spacing10_seed200.dat
 .vscode/
 anaconda_projects/
 restart.*
+*.bin
+*.txt
