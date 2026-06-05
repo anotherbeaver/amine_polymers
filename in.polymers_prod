@@ -24,14 +24,16 @@ variable molecule_file string "data/polymer_chainlength_${chain_length}_patchspa
 
 # current run setup
 variable output_traj equal 0
-variable output_traj_file string "data/dumps/prod_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.lammpstrj"
+variable output_traj_file string "data/dumps/prod_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+variable output_traj_patch equal 0
+variable output_traj_patch_file string "data/dumps/prodpatch_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
 variable output_msd equal 0
 variable output_msd_file string "logs/msd.dat"
-variable output_patch equal 0
-variable output_patch_file string "logs/patch_n_${patch_gauss_A_strength}_${patch_bond_r0}.dat"
-variable output_press equal 1
+variable output_patch equal 1
+variable output_patch_file string "data/patches/prodpatch_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+variable output_press equal 0
 variable output_press_file string "data/pressures/prodpress_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
-variable output_press_autocorr equal 1
+variable output_press_autocorr equal 0
 variable output_press_autocorr_file string "data/autocorrelation/prodautocorr_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
 
 variable log_file string "logs/log.prod_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}"
@@ -51,9 +53,13 @@ print "N_beads = ${N_beads}  N_chains = ${N_chains}  gauss_A = ${patch_gauss_A_s
 # create_atoms 0 random ${N_chains} 12345 box mol polymer ${random_seed}
 read_restart ${restart_file} # read in the final configuration from the equilibration run
 
+# group definitions
+group monomer type 1
+group patch type 2
+
 bond_style hybrid fene/omp harmonic/omp
 bond_coeff 1 fene/omp 30.0 1.5 1.0 1.0 # k, r0, epsilon, sigma for FENE bonds between backbone beads
-bond_coeff 2 harmonic/omp 1000 0.35  # stiff spring on patches
+bond_coeff 2 harmonic/omp 10000 0.35  # stiff spring on patches
 special_bonds fene # no interactions between adjacent atoms, but excluded volume for 1-3 and 1-4 interactions
 
 # neighbor list settings
@@ -78,15 +84,19 @@ if "${output_msd} == 1" then &
     "compute MSD all msd" &
     "fix msd_avg all ave/time 10 1 10 c_MSD[4] file ${output_msd_file} mode scalar"
 
-# save patch positions for bond analysis (optional)
-if "${output_patch} == 1" then &
-    "print 'Saving patch positions to ${output_patch_file}'" &
-    "dump patchpos patch custom 100000 ${output_patch_file} id type x y z"
+# # save patch positions for bond analysis (optional)
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.5" &
+#     "compute patch_cluster patch cluster/atom 0.5" &
+#     "dump patch_dump patch custom 100 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
 
 # save trajectory of all particles (optional)
 if "${output_traj} == 1" then &
     "print 'Saving trajectory to ${output_traj_file}'" &
-    "dump traj all atom 10 ${output_traj_file}"
+    "dump prod all custom 10 ${output_traj_file} id type mol x y z ix iy iz"
+
+
 
 # save p_xy data for modulus calculation
 if "${output_press} == 1" then &
@@ -97,12 +107,9 @@ variable px_y equal c_thermo_press[1] - c_thermo_press[2]
 variable px_z equal c_thermo_press[1] - c_thermo_press[3]
 variable py_z equal c_thermo_press[2] - c_thermo_press[3]
 
-# compute all_atoms all count/type atom
-variable natoms equal atoms
-print "Total number of atoms is ${natoms}"
 if "${output_press_autocorr} == 1" then &
     "print 'Saving pressure autocorrelation data to ${output_press_autocorr_file}' " &
-    "fix long_corr all ave/correlate/long 1 100000 v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] type auto file ${output_press_autocorr_file} overwrite title1 title2 ncorr 40 nlen 16 ncount 2" &
+    "fix long_corr monomer ave/correlate/long 1 10000 v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6] type auto file ${output_press_autocorr_file} overwrite title1 title2 ncorr 40 nlen 16 ncount 2" &
         # "v_px_y v_px_z v_py_z c_thermo_press[4] c_thermo_press[5] c_thermo_press[6]" &
         # "type auto & " &
         # "file ${output_press_autocorr_file} &" &
@@ -118,20 +125,47 @@ if "${output_press_autocorr} == 1" then &
 #-----------------------------------------------
 
 # experiment run 
-compute temp_com all temp/com
-# centre-of-mass msd calculation
-compute mol_chunks all chunk/atom molecule
-compute mol_msd all msd/chunk mol_chunks
-fix msd_out all ave/time 1000 1 1000 c_mol_msd[4] file data/msd/prodmsd_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat mode scalar
+# compute temp_com all temp/com
+# # centre-of-mass msd calculation
+# compute mol_chunks all chunk/atom molecule
+# compute mol_msd all msd/chunk mol_chunks
+# fix msd_out all ave/time 1000 1 1000 c_mol_msd file data/msd/prodmsd_chainlength_${chain_length}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat mode vector
 
 timestep 0.005
-thermo_style custom step temp epair emol etotal press pxy c_temp_com
-thermo 100
-dump prod all custom 1000000 ${output_traj_file} id type mol x y z ix iy iz
-run 500000000
-undump prod
+thermo_style custom step temp epair emol etotal press pxy
+thermo 1000
+# run for 10 million, then get bond lifetime data, then run for rest of production run
+run 10000000
+# -------------------------------
+# B O N D     L I F E T I M E
+# -------------------------------
+# save trajectory of patches (optional)
+if "${output_traj_patch} == 1" then &
+    "print 'Saving trajectory to ${output_traj_patch_file}'" &
+    "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
 
-variable density equal ${natoms} / (${wall_size} * ${wall_size} * ${wall_size})
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord patch coord/atom cutoff 0.5" &
+    "compute patch_cluster patch cluster/atom 0.5" &
+    "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+    "print 'Running for bond lifetime data collection'" &
+    "run 500000"
+
+if "${output_traj_patch} == 1" then &
+    "undump patch_prod"
+
+if "${output_patch} == 1" then &
+    "undump patch_dump"
+
+# -------------------------------
+# B A C K     T O     P R O D
+# -------------------------------
+run 490000000
+
+variable density equal ${N_beads} / (${wall_size} * ${wall_size} * ${wall_size})
 print "Final density is ${density}"
 
 print "Ending in.polymers_prod"

@@ -39,8 +39,9 @@ DUMPSDIR=data/dumps
 AUTOCORRDIR=data/autocorrelation
 PRESSDIR=data/pressures
 RESTARTSDIR=data/restarts
+PATCHESDIR=data/patches
 
-mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSDIR"
+mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSDIR" "$PATCHESDIR"
 
 # -----------------------------
 # Parameter space
@@ -109,3 +110,19 @@ srun ${LAMMPS} \
   -var random_seed "${random_seed}" 
 
 echo "Finished at $(date)"
+
+
+# mpirun -np 6 ../lammps/build/lmp -in "in.polymers_eq" \
+#     -var chain_length "30" \
+#     -var N_beads "24000" \
+#     -var patch_spacing "5" \
+#     -var patch_gauss_A_strength "30" \
+#     -var random_seed "12345"
+
+mpirun -np 6 ../lammps/build/lmp \
+  -in "in.polymers_prod" \
+  -var chain_length "30" \
+  -var N_beads "24000" \
+  -var patch_spacing "5" \
+  -var patch_gauss_A_strength "30" \
+  -var random_seed "12345" 
