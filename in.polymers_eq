@@ -176,8 +176,4 @@ run 5000000
 pair_coeff 2 2 gauss/omp ${patch_gauss_A_strength} ${patch_gauss_B_width} 2.0 # Gaussian attraction between patches turned on
 run 1000000
 
-
-undump eq
-unfix gyration
-reset_timestep 0
 print "Equilibration done"

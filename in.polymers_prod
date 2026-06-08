@@ -53,6 +53,8 @@ print "N_beads = ${N_beads}  N_chains = ${N_chains}  gauss_A = ${patch_gauss_A_s
 # create_atoms 0 random ${N_chains} 12345 box mol polymer ${random_seed}
 read_restart ${restart_file} # read in the final configuration from the equilibration run
 
+reset_timestep 0
+
 # group definitions
 group monomer type 1
 group patch type 2
