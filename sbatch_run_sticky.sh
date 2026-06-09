@@ -5,8 +5,8 @@
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
-#SBATCH --array=0-4
-#SBATCH --time=30:00:00
+#SBATCH --array=0-3
+#SBATCH --time=60:00:00
 #SBATCH --partition=skylake
 #SBATCH --output=logs/N_30_sticky_polymer_%A_%a.out
 #SBATCH --error=logs/N_30_sticky_polymer_%A_%a.err
@@ -49,7 +49,7 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 N_list=(30) # lengths of chains (axis 1)
 N_beads_list=(24000) # number of beads (total system size), each corresponds to a chain length (axis 1)
 patch_spacing_list=(5) # spacing between patches (axis 2)
-patch_strength_list=(25 30 45 50) # strength of patch attraction (axis 3)
+patch_strength_list=(30 35 40 45) # strength of patch attraction (axis 3)
 random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 
 # -----------------------------
@@ -109,6 +109,8 @@ srun ${LAMMPS} \
   -var patch_gauss_A_strength "${patch_strength}" \
   -var random_seed "${random_seed}" 
 
+srun ../lammps_build/lammps/tools/binary2txt "prodpatch_chainlength_30_N_beads_24000_gaussA_${patch_strength}_r0_0.35_gaussB_10_seed_12345.bin.txt"
+
 echo "Finished at $(date)"
 
 
@@ -119,10 +121,10 @@ echo "Finished at $(date)"
 #     -var patch_gauss_A_strength "30" \
 #     -var random_seed "12345"
 
-mpirun -np 6 ../lammps/build/lmp \
-  -in "in.polymers_prod" \
-  -var chain_length "30" \
-  -var N_beads "24000" \
-  -var patch_spacing "5" \
-  -var patch_gauss_A_strength "30" \
-  -var random_seed "12345" 
+# mpirun -np 6 ../lammps/build/lmp \
+#   -in "in.polymers_prod" \
+#   -var chain_length "30" \
+#   -var N_beads "24000" \
+#   -var patch_spacing "5" \
+#   -var patch_gauss_A_strength "30" \
+#   -var random_seed "12345" 
