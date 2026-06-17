@@ -23,7 +23,7 @@ print "Calculated box size is ${wall_size}"
 variable molecule_file string "data/polymer_chainlength_${chain_length}_patchspacing_${patch_spacing}_backbone2patch_${patch_bond_r0}.molecule"
 
 # current run setup
-variable output_traj equal 0
+variable output_traj equal 1
 variable output_traj_file string "data/dumps/prod_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
 variable output_traj_patch equal 0
 variable output_traj_patch_file string "data/dumps/prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
@@ -61,7 +61,7 @@ group patch type 2
 
 bond_style hybrid fene/omp harmonic/omp
 bond_coeff 1 fene/omp 30.0 1.5 1.0 1.0 # k, r0, epsilon, sigma for FENE bonds between backbone beads
-bond_coeff 2 harmonic/omp 10000 0.35  # stiff spring on patches
+bond_coeff 2 harmonic/omp 30000 0.25  # stiff spring on patches
 special_bonds fene # no interactions between adjacent atoms, but excluded volume for 1-3 and 1-4 interactions
 
 # neighbor list settings
@@ -96,7 +96,7 @@ if "${output_msd} == 1" then &
 # save trajectory of all particles (optional)
 if "${output_traj} == 1" then &
     "print 'Saving trajectory to ${output_traj_file}'" &
-    "dump prod all custom 10 ${output_traj_file} id type mol x y z ix iy iz"
+    "dump prod all custom 100 ${output_traj_file} id type mol x y z ix iy iz"
 
 
 
@@ -135,9 +135,9 @@ if "${output_press_autocorr} == 1" then &
 
 timestep 0.005
 thermo_style custom step temp epair emol etotal press pxy
-thermo 1000
+thermo 100
 # run for 10 million, then get bond lifetime data, then run for rest of production run
-run 10000000
+run 100000
 # -------------------------------
 # B O N D     L I F E T I M E
 # -------------------------------
@@ -165,7 +165,7 @@ if "${output_patch} == 1" then &
 # -------------------------------
 # B A C K     T O     P R O D
 # -------------------------------
-run 490000000
+# run 490000000
 
 variable density equal ${N_beads} / (${wall_size} * ${wall_size} * ${wall_size})
 print "Final density is ${density}"
