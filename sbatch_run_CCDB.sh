@@ -6,9 +6,9 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
 #SBATCH --array=0-4
-#SBATCH --time=60:00:00
-#SBATCH --output=logs/N_30_spacing_3_sticky_polymer_%A_%a.out
-#SBATCH --error=logs/N_30_spacing_3_sticky_polymer_%A_%a.err
+#SBATCH --time=80:00:00
+#SBATCH --output=logs/N_30_spacing_5_sticky_polymer_%A_%a.out
+#SBATCH --error=logs/N_30_spacing_5_sticky_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=azhu13@student.ubc.ca
 
@@ -48,9 +48,9 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 # -----------------------------
 N_list=(30) # lengths of chains (axis 1)
 N_beads_list=(24000) # number of beads (total system size), each corresponds to a chain length (axis 1)
-patch_spacing_list=(3) # spacing between patches (axis 2)
-patch_strength_list=(30 35 40 45 50) # strength of patch attraction (axis 3)
-random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
+patch_spacing_list=(5) # spacing between patches (axis 2)
+patch_strength_list=(50) # strength of patch attraction (axis 3)
+random_seed_list=(11111 22222 33333 44444 55555) # random seeds for Langevin thermostat (axis 4)
 
 # -----------------------------
 # Map array index -> parameters
@@ -64,8 +64,8 @@ index=$((SLURM_ARRAY_TASK_ID))
 N=${N_list[0]}
 N_beads=${N_beads_list[0]}
 patch_spacing=${patch_spacing_list[0]}
-patch_strength=${patch_strength_list[index]}
-random_seed=${random_seed_list[0]}
+patch_strength=${patch_strength_list[0]}
+random_seed=${random_seed_list[index]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
 
