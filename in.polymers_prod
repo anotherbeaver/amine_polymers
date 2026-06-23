@@ -160,6 +160,8 @@ if "${output_traj_patch} == 1" then &
     "undump patch_prod"
 
 if "${output_patch} == 1" then &
+    "uncompute patch_coord" &
+    "uncompute patch_cluster" &
     "undump patch_dump"
 
 # -------------------------------
