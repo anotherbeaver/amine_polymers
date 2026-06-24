@@ -23,14 +23,12 @@ print "Calculated box size is ${wall_size}"
 variable molecule_file string "data/polymer_chainlength_${chain_length}_patchspacing_${patch_spacing}_backbone2patch_${patch_bond_r0}.molecule"
 
 # current run setup
-variable output_traj equal 0
-variable output_traj_file string "data/dumps/prod_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+variable output_traj equal 1
+variable output_traj_file string "data/dumps/lifetimeprod_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
 variable output_traj_patch equal 0
 variable output_traj_patch_file string "data/dumps/prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
 variable output_msd equal 0
 variable output_msd_file string "logs/msd.dat"
-variable output_patch equal 1
-variable output_patch_file string "data/patches/prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
 variable output_press equal 0
 variable output_press_file string "data/pressures/prodpress_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
 variable output_press_autocorr equal 0
@@ -61,7 +59,7 @@ group patch type 2
 
 bond_style hybrid fene/omp harmonic/omp
 bond_coeff 1 fene/omp 30.0 1.5 1.0 1.0 # k, r0, epsilon, sigma for FENE bonds between backbone beads
-bond_coeff 2 harmonic/omp 30000 0.25  # stiff spring on patches
+bond_coeff 2 harmonic/omp 30000 ${patch_bond_r0}  # stiff spring on patches
 special_bonds fene # no interactions between adjacent atoms, but excluded volume for 1-3 and 1-4 interactions
 
 # neighbor list settings
@@ -139,18 +137,59 @@ thermo 100
 # run for 10 million, then get bond lifetime data, then run for rest of production run
 # run 10000000
 # -------------------------------
-# B O N D     L I F E T I M E
+# B O N D     L I F E T I M E  (R_c = 0.1)
 # -------------------------------
 # save trajectory of patches (optional)
+variable output_patch delete
+variable output_patch_file delete
+variable output_patch equal 1
+variable output_patch_file string "data/patches/0.1prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
 if "${output_traj_patch} == 1" then &
     "print 'Saving trajectory to ${output_traj_patch_file}'" &
     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
 
 if "${output_patch} == 1" then &
     "print 'Saving patch positions to ${output_patch_file}'" &
-    "compute patch_coord patch coord/atom cutoff 0.6" &
-    "compute patch_cluster patch cluster/atom 0.6" &
-    "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+    "compute patch_coord1 patch coord/atom cutoff 0.1 group patch" &
+    "compute patch_cluster1 patch cluster/atom 0.1" &
+    "dump patch_dump1 patch custom 10 data/patches/0.1prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord2 patch coord/atom cutoff 0.2 group patch" &
+    "compute patch_cluster2 patch cluster/atom 0.2" &
+    "dump patch_dump2 patch custom 10 data/patches/0.2prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord3 patch coord/atom cutoff 0.3 group patch" &
+    "compute patch_cluster3 patch cluster/atom 0.3" &
+    "dump patch_dump3 patch custom 10 data/patches/0.3prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord4 patch coord/atom cutoff 0.4 group patch" &
+    "compute patch_cluster4 patch cluster/atom 0.4" &
+    "dump patch_dump4 patch custom 10 data/patches/0.4prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord5 patch coord/atom cutoff 0.5 group patch" &
+    "compute patch_cluster5 patch cluster/atom 0.5" &
+    "dump patch_dump5 patch custom 10 data/patches/0.5prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord6 patch coord/atom cutoff 0.6 group patch" &
+    "compute patch_cluster6 patch cluster/atom 0.6" &
+    "dump patch_dump6 patch custom 10 data/patches/0.6prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
+
+if "${output_patch} == 1" then &
+    "print 'Saving patch positions to ${output_patch_file}'" &
+    "compute patch_coord7 patch coord/atom cutoff 0.7 group patch" &
+    "compute patch_cluster7 patch cluster/atom 0.7" &
+    "dump patch_dump7 patch custom 10 data/patches/0.7prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin id mol x y z c_patch_coord c_patch_cluster"
 
 if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
     "print 'Running for bond lifetime data collection'" &
@@ -159,8 +198,192 @@ if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
 if "${output_traj_patch} == 1" then &
     "undump patch_prod"
 
-if "${output_patch} == 1" then &
-    "undump patch_dump"
+# if "${output_patch} == 1" then & # doesn't matter for now, not running it after bond lifetime section
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+
+# # -------------------------------
+# # B O N D     L I F E T I M E  (R_c = 0.2)
+# # -------------------------------
+# # save trajectory of patches (optional)
+# variable output_patch delete
+# variable output_patch_file delete
+# variable output_patch equal 1
+# variable output_patch_file string "data/patches/0.2prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
+# if "${output_traj_patch} == 1" then &
+#     "print 'Saving trajectory to ${output_traj_patch_file}'" &
+#     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
+
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.2 group patch" &
+#     "compute patch_cluster patch cluster/atom 0.2" &
+#     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+# if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+#     "print 'Running for bond lifetime data collection'" &
+#     "run 500000"
+
+# if "${output_traj_patch} == 1" then &
+#     "undump patch_prod"
+
+# if "${output_patch} == 1" then &
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+# # -------------------------------
+# # B O N D     L I F E T I M E  (R_c = 0.3)
+# # -------------------------------
+# # save trajectory of patches (optional)
+# variable output_patch delete
+# variable output_patch_file delete
+# variable output_patch equal 1
+# variable output_patch_file string "data/patches/0.3prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
+# if "${output_traj_patch} == 1" then &
+#     "print 'Saving trajectory to ${output_traj_patch_file}'" &
+#     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
+
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.3 group patch" &
+#     "compute patch_cluster patch cluster/atom 0.3" &
+#     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+# if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+#     "print 'Running for bond lifetime data collection'" &
+#     "run 500000"
+
+# if "${output_traj_patch} == 1" then &
+#     "undump patch_prod"
+
+# if "${output_patch} == 1" then &
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+# # -------------------------------
+# # B O N D     L I F E T I M E  (R_c = 0.4)
+# # -------------------------------
+# # save trajectory of patches (optional)
+# variable output_patch delete
+# variable output_patch_file delete
+# variable output_patch equal 1
+# variable output_patch_file string "data/patches/0.4prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
+# if "${output_traj_patch} == 1" then &
+#     "print 'Saving trajectory to ${output_traj_patch_file}'" &
+#     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
+
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.4 group patch" &
+#     "compute patch_cluster patch cluster/atom 0.4" &
+#     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+# if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+#     "print 'Running for bond lifetime data collection'" &
+#     "run 500000"
+
+# if "${output_traj_patch} == 1" then &
+#     "undump patch_prod"
+
+# if "${output_patch} == 1" then &
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+# # -------------------------------
+# # B O N D     L I F E T I M E  (R_c = 0.5)
+# # -------------------------------
+# # save trajectory of patches (optional)
+# variable output_patch delete
+# variable output_patch_file delete
+# variable output_patch equal 1
+# variable output_patch_file string "data/patches/0.5prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
+# if "${output_traj_patch} == 1" then &
+#     "print 'Saving trajectory to ${output_traj_patch_file}'" &
+#     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
+
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.5 group patch" &
+#     "compute patch_cluster patch cluster/atom 0.5" &
+#     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+# if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+#     "print 'Running for bond lifetime data collection'" &
+#     "run 500000"
+
+# if "${output_traj_patch} == 1" then &
+#     "undump patch_prod"
+
+# if "${output_patch} == 1" then &
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+# # -------------------------------
+# # B O N D     L I F E T I M E  (R_c = 0.6)
+# # -------------------------------
+# # save trajectory of patches (optional)
+# variable output_patch delete
+# variable output_patch_file delete
+# variable output_patch equal 1
+# variable output_patch_file string "data/patches/0.6prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
+# if "${output_traj_patch} == 1" then &
+#     "print 'Saving trajectory to ${output_traj_patch_file}'" &
+#     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
+
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.6 group patch" &
+#     "compute patch_cluster patch cluster/atom 0.6" &
+#     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+# if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+#     "print 'Running for bond lifetime data collection'" &
+#     "run 500000"
+
+# if "${output_traj_patch} == 1" then &
+#     "undump patch_prod"
+
+# if "${output_patch} == 1" then &
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+# # -------------------------------
+# # B O N D     L I F E T I M E  (R_c = 0.7)
+# # -------------------------------
+# # save trajectory of patches (optional)
+# variable output_patch delete
+# variable output_patch_file delete
+# variable output_patch equal 1
+# variable output_patch_file string "data/patches/0.7prodpatch_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.bin"
+
+# if "${output_traj_patch} == 1" then &
+#     "print 'Saving trajectory to ${output_traj_patch_file}'" &
+#     "dump patch_prod patch custom 10 ${output_traj_patch_file} id type mol x y z ix iy iz"
+
+# if "${output_patch} == 1" then &
+#     "print 'Saving patch positions to ${output_patch_file}'" &
+#     "compute patch_coord patch coord/atom cutoff 0.7 group patch" &
+#     "compute patch_cluster patch cluster/atom 0.7" &
+#     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
+
+# if "${output_patch} == 1 || ${output_traj_patch} == 1" then &
+#     "print 'Running for bond lifetime data collection'" &
+#     "run 500000"
+
+# if "${output_traj_patch} == 1" then &
+#     "undump patch_prod"
+
+# if "${output_patch} == 1" then &
+#     "undump patch_dump" &
+#     "uncompute patch_coord" &
+#     "uncompute patch_cluster"
+
 
 # -------------------------------
 # B A C K     T O     P R O D
@@ -170,4 +393,4 @@ if "${output_patch} == 1" then &
 variable density equal ${N_beads} / (${wall_size} * ${wall_size} * ${wall_size})
 print "Final density is ${density}"
 
-print "Ending in.polymers_prod"
+print "Ending in.polymers_lifetime_prod"
