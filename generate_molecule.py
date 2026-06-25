@@ -17,7 +17,7 @@ def generate_molecule_file(filename=None,
     if patch_spacing == 0:
         patch_positions = []
     else:
-        patch_positions = list(range(patch_spacing, chain_length, patch_spacing))
+        patch_positions = list(range(0, chain_length, patch_spacing))
         if patch_positions[-1] == chain_length - 1:
             print("Warning: Last monomer is a patch. This affects chain length (slightly).")
 
