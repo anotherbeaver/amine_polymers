@@ -148,7 +148,7 @@ if "${output_traj_patch} == 1" then &
 
 if "${output_patch} == 1" then &
     "print 'Saving patch positions to ${output_patch_file}'" &
-    "compute patch_coord patch coord/atom cutoff 0.6" &
+    "compute patch_coord patch coord/atom cutoff 0.6 group patch" &
     "compute patch_cluster patch cluster/atom 0.6" &
     "dump patch_dump patch custom 10 ${output_patch_file} id mol x y z c_patch_coord c_patch_cluster"
 
