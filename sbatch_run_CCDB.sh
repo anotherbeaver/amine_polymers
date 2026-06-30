@@ -46,11 +46,11 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 # -----------------------------
 # Parameter space
 # -----------------------------
-N_list=(30) # lengths of chains (axis 1)
-N_beads_list=(24000) # number of beads (total system size), each corresponds to a chain length (axis 1)
+N_list=(31) # lengths of chains (axis 1)
+N_beads_list=(24800) # number of beads (total system size), each corresponds to a chain length (axis 1)
 patch_spacing_list=(5) # spacing between patches (axis 2)
-patch_strength_list=(50) # strength of patch attraction (axis 3)
-random_seed_list=(11111 22222 33333 44444 55555) # random seeds for Langevin thermostat (axis 4)
+patch_strength_list=(80 85 90 95 100) # strength of patch attraction (axis 3)
+random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 
 # -----------------------------
 # Map array index -> parameters
@@ -64,8 +64,8 @@ index=$((SLURM_ARRAY_TASK_ID))
 N=${N_list[0]}
 N_beads=${N_beads_list[0]}
 patch_spacing=${patch_spacing_list[0]}
-patch_strength=${patch_strength_list[0]}
-random_seed=${random_seed_list[index]}
+patch_strength=${patch_strength_list[index]}
+random_seed=${random_seed_list[0]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
 
@@ -109,7 +109,7 @@ srun ${LAMMPS} \
   -var patch_gauss_A_strength "${patch_strength}" \
   -var random_seed "${random_seed}" 
 
-srun BINARY2TXT "prodpatch_chainlength_30_N_beads_24000_gaussA_${patch_strength}_r0_0.35_gaussB_10_seed_12345.bin.txt"
+srun BINARY2TXT "prodpatch_chainlength_31_N_beads_24800_gaussA_${patch_strength}_r0_0.25_gaussB_10_seed_12345.bin.txt"
 
 echo "Finished at $(date)"
 
