@@ -84,7 +84,8 @@ echo "Appended parameters to ${LOOKUP_FILE}"
 # -----------------------------
 python3 generate_molecule.py \
     --chain_length ${N} \
-    --patch_spacing ${patch_spacing}
+    --patch_spacing ${patch_spacing} \
+    --backbone_to_patch 0.25
 
 # -----------------------------
 # Run LAMMPS
