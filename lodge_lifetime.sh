@@ -7,17 +7,21 @@ set -e
 
 for A in "${A_list[@]}"; do
     echo "Simulating A=${A}"
-    # mpirun -np 6 ../lammps/build/lmp \
-    #     -in "in.polymers_lifetime_eq" \
-    #     -var chain_length "31" \
-    #     -var N_beads "24800" \
-    #     -var patch_spacing "5" \
-    #     -var patch_gauss_A_strength "$A" \
-    #     -var random_seed "12345"
 
-    # wait
+    python3 generate_molecule.py --backbone_to_patch 0.25 \
+                                 --chain_length 31 \
+                                 --patch_spacing 5
+    mpirun -np 12 lmp \
+         -in "in.polymers_lifetime_eq" \
+         -var chain_length "31" \
+         -var N_beads "24800" \
+         -var patch_spacing "5" \
+         -var patch_gauss_A_strength "$A" \
+         -var random_seed "12345"
 
-    mpirun -np 6 ../lammps/build/lmp \
+     wait
+
+    mpirun -np 6 lmp \
         -in "in.polymers_lifetime_prod" \
         -var chain_length "31" \
         -var N_beads "24800" \

@@ -193,6 +193,6 @@ timestep 0.002
 thermo_style custom step temp epair emol etotal press pxy
 thermo 100
 # run for 2 million, then get bond lifetime data, then run for rest of production run
-run 2000000
+run 500000
 
 print "Equilibration done"

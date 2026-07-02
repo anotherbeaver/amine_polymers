@@ -19,3 +19,4 @@ anaconda_projects/
 restart.*
 *.bin
 *.txt
+*.log
