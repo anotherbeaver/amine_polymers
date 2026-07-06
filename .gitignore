@@ -20,3 +20,5 @@ restart.*
 *.bin
 *.txt
 *.log
+*.err
+*.data
