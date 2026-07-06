@@ -110,7 +110,7 @@ srun ${LAMMPS} \
   -var patch_gauss_A_strength "${patch_strength}" \
   -var random_seed "${random_seed}" 
 
-srun ${BINARY2TXT} "prodpatch_chainlength_30_N_beads_24000_gaussA_${patch_strength}_r0_0.35_gaussB_10_seed_12345.bin"
+# srun ${BINARY2TXT} "prodpatch_chainlength_30_N_beads_24000_gaussA_${patch_strength}_r0_0.35_gaussB_10_seed_12345.bin"
 
 echo "Finished at $(date)"
 
