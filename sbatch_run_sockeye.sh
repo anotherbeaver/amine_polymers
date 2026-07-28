@@ -6,10 +6,10 @@
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
-#SBATCH --array=0-24
-#SBATCH --time=80:00:00
-#SBATCH --output=logs/N_30_spacing_5_sticky_polymer_%A_%a.out
-#SBATCH --error=logs/N_30_spacing_5_sticky_polymer_%A_%a.err
+#SBATCH --array=0-17
+#SBATCH --time=150:00:00
+#SBATCH --output=logs/N_31_spacing_5_sticky_polymer_%A_%a.out
+#SBATCH --error=logs/N_31_spacing_5_sticky_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=azhu13@student.ubc.ca
 
@@ -47,11 +47,11 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 # -----------------------------
 # Parameter space
 # -----------------------------
-N_list=(30) # lengths of chains (axis 1)
-N_beads_list=(24000) # number of beads (total system size), each corresponds to a chain length (axis 1)
-patch_spacing_list=(5) # spacing between patches (axis 2)
-patch_strength_list=(30 35 40 45 50) # strength of patch attraction (axis 3)
-random_seed_list=(11111 22222 33333 44444 55555) # random seeds for Langevin thermostat (axis 4)
+N_list=(31) # lengths of chains (axis 1)
+N_beads_list=(24800) # number of beads (total system size), each corresponds to a chain length (axis 1)
+patch_spacing_list=(3 7) # spacing between patches (axis 2)
+patch_strength_list=(60 70 80 90 100 110 120 130 140) # strength of patch attraction (axis 3)
+random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 
 # -----------------------------
 # Map array index -> parameters
@@ -64,9 +64,9 @@ index=$((SLURM_ARRAY_TASK_ID))
 # TODO: need to update this part when we have more axes in the parameter space
 N=${N_list[0]}
 N_beads=${N_beads_list[0]}
-patch_spacing=${patch_spacing_list[0]}
-patch_strength=${patch_strength_list[$((index/5))]}
-random_seed=${random_seed_list[$((index%5))]}
+patch_spacing=${patch_spacing_list[$((index/2))]}
+patch_strength=${patch_strength_list[0]}
+random_seed=${random_seed_list[$((index%2))]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
 
@@ -85,7 +85,8 @@ echo "Appended parameters to ${LOOKUP_FILE}"
 # -----------------------------
 python3 generate_molecule.py \
     --chain_length ${N} \
-    --patch_spacing ${patch_spacing}
+    --patch_spacing ${patch_spacing} \
+    --backbone_to_patch 0.25
 
 # -----------------------------
 # Run LAMMPS
@@ -110,7 +111,7 @@ srun ${LAMMPS} \
   -var patch_gauss_A_strength "${patch_strength}" \
   -var random_seed "${random_seed}" 
 
-# srun ${BINARY2TXT} "prodpatch_chainlength_30_N_beads_24000_gaussA_${patch_strength}_r0_0.35_gaussB_10_seed_12345.bin"
+srun ${BINARY2TXT} "prodpatch_chainlength_31_patchspacing_${patch_spacing}_N_beads_24800_gaussA_${patch_strength}_r0_0.25_gaussB_10_seed_12345.bin.txt"
 
 echo "Finished at $(date)"
 
