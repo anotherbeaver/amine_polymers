@@ -40,6 +40,8 @@ variable output_press equal 0
 variable output_press_file string "data/pressure/eqpress_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
 variable output_press_autocorr equal 0
 variable output_press_autocorr_file string "data/autocorrelation/eqautocorr_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
+variable random_patch_spacing equal 1
+
 
 variable log_file string "logs/log.eq_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}.dat"
 variable restart_file string "data/restarts/restart.eq_chainlength_${chain_length}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_gauss_A_strength}_r0_${patch_bond_r0}_gaussB_${patch_gauss_B_width}_seed_${random_seed}"
@@ -70,7 +72,28 @@ special_bonds fene # no interactions between adjacent atoms, but excluded volume
 
 # create atoms
 print "N_beads = ${N_beads}  N_chains = ${N_chains} random_seed = ${random_seed}"
+if "${random_patch_spacing} == 1" then &
+    "jump SELF random_spacing_loop"
+    else &
+    "jump SELF fixed_spacing_loop"
+      
+
+label random_spacing_loop
+print 'Random patch spacing is ON'
+variable a loop ${N_chains}
+label loop
+shell python generate_molecule.py --chain_length ${chain_length} --patch_spacing ${patch_spacing} --backbone_to_patch ${patch_bond_r0} --random ${random_patch_spacing}
+molecule $a ${molecule_file}
+create_atoms 0 random 1 $(v_random_seed + 13 * v_a) box mol $a $(v_random_seed + 13 * v_a)
+next a
+jump SELF loop
+jump SELF end_spacing_loop
+
+label fixed_spacing_loop
+print 'Random patch spacing is OFF'
 create_atoms 0 random ${N_chains} 12345 box mol polymer ${random_seed}
+
+label end_spacing_loop
 
 # group definitions
 group monomer type 1
