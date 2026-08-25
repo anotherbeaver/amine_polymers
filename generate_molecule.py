@@ -5,19 +5,28 @@ Note that the formatting of individual atoms has been split across the sections 
 """
 
 import argparse
+import random as rand
 
 
 def generate_molecule_file(filename=None,
                            chain_length=25,
                            patch_spacing=5,
-                           backbone_to_patch=0.35):
+                           backbone_to_patch=0.35,
+                           random=False):
 
     if patch_spacing > chain_length:
         print("Warning: Patch spacing cannot be greater than chain length.")
     if patch_spacing == 0:
         patch_positions = []
     else:
-        patch_positions = list(range(0, chain_length, patch_spacing))
+        if random:
+            patch_position_choices = rand.choices([0, 1], weights=[(1 - 1/(patch_spacing)), 1/(patch_spacing)], k=chain_length)
+            print(patch_position_choices)
+            patch_positions = [index for index, value in enumerate(patch_position_choices) if value == 1]
+            print("Patch positions (random):")
+            print(patch_positions)
+        else:
+            patch_positions = list(range(0, chain_length, patch_spacing))
         if patch_positions[-1] == chain_length - 1:
             print("Warning: Last monomer is a patch. This affects chain length (slightly).")
 
@@ -62,12 +71,14 @@ if __name__ == "__main__":
     args.add_argument('--chain_length', type=int, default=25, help='Length of the polymer chain')
     args.add_argument('--patch_spacing', type=int, default=5, help='Spacing between sticky patches')
     args.add_argument('--backbone_to_patch', type=float, default=0.35, help='Distance from backbone to patch')
+    args.add_argument('--random', type=bool, default=False, help='Whether to randomize the patch positions')
     args = args.parse_args()
     print(args)
     fname = generate_molecule_file(
         filename=args.filename,
         chain_length=args.chain_length,
         patch_spacing=args.patch_spacing,
-        backbone_to_patch=args.backbone_to_patch
+        backbone_to_patch=args.backbone_to_patch,
+        random=args.random
     )
     print(f"Generated molecule file: {fname}")
