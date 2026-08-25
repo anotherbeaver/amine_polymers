@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
 #SBATCH --array=0-8
-#SBATCH --time=150:00:00
+#SBATCH --time=300:00:00
 #SBATCH --output=logs/N_31_random_spacing_5_sticky_polymer_%A_%a.out
 #SBATCH --error=logs/N_31_random_spacing_5_sticky_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -64,9 +64,9 @@ index=$((SLURM_ARRAY_TASK_ID))
 # TODO: need to update this part when we have more axes in the parameter space
 N=${N_list[0]}
 N_beads=${N_beads_list[0]}
-patch_spacing=${patch_spacing_list[$(index)]}
+patch_spacing=${patch_spacing_list[${index}]}
 patch_strength=${patch_strength_list[0]}
-random_seed=${random_seed_list[$(index)]}
+random_seed=${random_seed_list[${index}]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
 
