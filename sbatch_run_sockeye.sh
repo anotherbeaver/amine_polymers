@@ -64,9 +64,9 @@ index=$((SLURM_ARRAY_TASK_ID))
 # TODO: need to update this part when we have more axes in the parameter space
 N=${N_list[0]}
 N_beads=${N_beads_list[0]}
-patch_spacing=${patch_spacing_list[${index}]}
-patch_strength=${patch_strength_list[0]}
-random_seed=${random_seed_list[${index}]}
+patch_spacing=${patch_spacing_list[0]}
+patch_strength=${patch_strength_list[${index}]}
+random_seed=${random_seed_list[0]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
 
