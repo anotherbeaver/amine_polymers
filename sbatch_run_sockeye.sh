@@ -101,7 +101,7 @@ srun ${LAMMPS} -in "${INPUTEQ}" \
     -var patch_spacing "${patch_spacing}" \
     -var patch_gauss_A_strength "${patch_strength}" \
     -var random_seed "${random_seed}" \
-    -var molecule_file "data/polymer_chainlength_${N}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_strength}_r0_0.25_gaussB_10_seed_${random_seed}_arrayid_${SLURM_ARRAY_TASK_ID}.mol"
+    -var molecule_file "data/polymer_chainlength_${N}_patchspacing_${patch_spacing}_N_beads_${N_beads}_gaussA_${patch_strength}_r0_0.25_gaussB_10_seed_${random_seed}_arrayid_${SLURM_ARRAY_TASK_ID}.molecule"
 
 srun ${LAMMPS} \
   -sf omp \
