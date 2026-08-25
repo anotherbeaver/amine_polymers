@@ -20,7 +20,7 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 N_list=(31) # lengths of chains (axis 1)
 N_beads_list=(24800) # number of beads (total system size), each corresponds to a chain length (axis 1)
 patch_spacing_list=(5) # spacing between patches (axis 2)
-patch_strength_list=(140 150 145 135) # strength of patch attraction (axis 3)
+patch_strength_list=(0) # strength of patch attraction (axis 3)
 random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 
 # -----------------------------
@@ -43,10 +43,11 @@ for index in "${!patch_strength_list[@]}"; do
   # -----------------------------
   # Molecule generation
   # -----------------------------
-  python3 generate_molecule.py \
-      --chain_length ${N} \
-      --patch_spacing ${patch_spacing} \
-      --backbone_to_patch 0.25
+  # python3 generate_molecule.py \
+  #     --chain_length ${N} \
+  #     --patch_spacing ${patch_spacing} \
+  #     --backbone_to_patch 0.25 \
+  #     --random 1
 
   # -----------------------------
   # Run LAMMPS
@@ -60,16 +61,17 @@ for index in "${!patch_strength_list[@]}"; do
       -var patch_spacing "${patch_spacing}" \
       -var patch_gauss_A_strength "${patch_strength}" \
       -var random_seed "${random_seed}"
+      # -var random_patch_spacing 1
 
-  mpirun -n 8 ${LAMMPS} \
-    -sf omp \
-    -pk omp ${OMP_NUM_THREADS} \
-    -in "${INPUTPROD}" \
-    -var chain_length "${N}" \
-    -var N_beads "${N_beads}" \
-    -var patch_spacing "${patch_spacing}" \
-    -var patch_gauss_A_strength "${patch_strength}" \
-    -var random_seed "${random_seed}" 
+  # mpirun -n 8 ${LAMMPS} \
+  #   -sf omp \
+  #   -pk omp ${OMP_NUM_THREADS} \
+  #   -in "${INPUTPROD}" \
+  #   -var chain_length "${N}" \
+  #   -var N_beads "${N_beads}" \
+  #   -var patch_spacing "${patch_spacing}" \
+  #   -var patch_gauss_A_strength "${patch_strength}" \
+  #   -var random_seed "${random_seed}" 
 
   echo "Finished at $(date)"
 

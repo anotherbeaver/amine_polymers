@@ -22,3 +22,4 @@ restart.*
 *.log
 *.err
 *.data
+*.zip
