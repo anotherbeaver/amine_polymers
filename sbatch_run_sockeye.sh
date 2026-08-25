@@ -6,10 +6,10 @@
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
-#SBATCH --array=0-17
+#SBATCH --array=0-8
 #SBATCH --time=150:00:00
-#SBATCH --output=logs/N_31_spacing_5_sticky_polymer_%A_%a.out
-#SBATCH --error=logs/N_31_spacing_5_sticky_polymer_%A_%a.err
+#SBATCH --output=logs/N_31_random_spacing_5_sticky_polymer_%A_%a.out
+#SBATCH --error=logs/N_31_random_spacing_5_sticky_polymer_%A_%a.err
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=azhu13@student.ubc.ca
 
@@ -49,7 +49,7 @@ mkdir -p "$LOGDIR" "$DATADIR" "$DUMPSDIR" "$AUTOCORRDIR" "$PRESSDIR" "$RESTARTSD
 # -----------------------------
 N_list=(31) # lengths of chains (axis 1)
 N_beads_list=(24800) # number of beads (total system size), each corresponds to a chain length (axis 1)
-patch_spacing_list=(3 7) # spacing between patches (axis 2)
+patch_spacing_list=(5) # spacing between patches (axis 2)
 patch_strength_list=(60 70 80 90 100 110 120 130 140) # strength of patch attraction (axis 3)
 random_seed_list=(12345) # random seeds for Langevin thermostat (axis 4)
 
@@ -64,9 +64,9 @@ index=$((SLURM_ARRAY_TASK_ID))
 # TODO: need to update this part when we have more axes in the parameter space
 N=${N_list[0]}
 N_beads=${N_beads_list[0]}
-patch_spacing=${patch_spacing_list[$((index/2))]}
+patch_spacing=${patch_spacing_list[$(index)]}
 patch_strength=${patch_strength_list[0]}
-random_seed=${random_seed_list[$((index%2))]}
+random_seed=${random_seed_list[$(index)]}
 
 echo "Running N=${N}, N_beads=${N_beads}, patch_spacing=${patch_spacing}, patch_strength=${patch_strength}, random_seed=${random_seed}"
 
@@ -111,7 +111,7 @@ srun ${LAMMPS} \
   -var patch_gauss_A_strength "${patch_strength}" \
   -var random_seed "${random_seed}" 
 
-srun ${BINARY2TXT} "prodpatch_chainlength_31_patchspacing_${patch_spacing}_N_beads_24800_gaussA_${patch_strength}_r0_0.25_gaussB_10_seed_12345.bin.txt"
+# srun ${BINARY2TXT} "prodpatch_chainlength_31_patchspacing_${patch_spacing}_N_beads_24800_gaussA_${patch_strength}_r0_0.25_gaussB_10_seed_12345.bin.txt"
 
 echo "Finished at $(date)"
 
